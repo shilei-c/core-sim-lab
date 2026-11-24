@@ -1,0 +1,9 @@
+# 临时优化脚本与数据（不影响站点运行，无需上传）
+opt.js
+search.js
+search2.js
+search3.js
+data/opt-*.json
+
+# node 依赖（站点运行无需 npm install）
+node_modules/

@@ -1,0 +1,12 @@
+{
+  "name": "core-sim-trader",
+  "version": "1.0.0",
+  "private": true,
+  "description": "CORE coin simulated trading with OKX live data, 3 strategy rules and auto backtesting",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

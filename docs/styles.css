@@ -1,0 +1,262 @@
+/* CORE 实验室 · Apple 风格简约设计 */
+:root{
+  --bg:#f5f5f7; --card:#ffffff; --ink:#1d1d1f; --sub:#86868b; --line:#e8e8ed;
+  --blue:#0a84ff; --green:#30d158; --red:#ff453a; --orange:#ff9f0a; --purple:#bf5af2;
+  --radius:20px; --shadow:0 2px 12px rgba(0,0,0,.045),0 12px 36px rgba(0,0,0,.035);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","PingFang SC","Helvetica Neue",Arial,sans-serif;
+  font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased;
+}
+button{font-family:inherit}
+.app{min-height:100vh;display:flex;flex-direction:column}
+.topbar{position:sticky;top:0;z-index:20;background:rgba(245,245,247,.82);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);border-bottom:.5px solid rgba(0,0,0,.08)}
+.topbar-inner{max-width:1080px;margin:0 auto;padding:12px 20px;display:flex;align-items:center;justify-content:space-between}
+.brand{display:flex;align-items:center;gap:11px}
+.brand-logo{width:36px;height:36px;border-radius:11px;background:linear-gradient(145deg,#ffd60a,#ff9f0a);color:#fff;display:grid;place-items:center;font-weight:800;font-size:19px;box-shadow:0 4px 12px rgba(255,159,10,.32)}
+.brand-title{font-weight:700;font-size:16px;letter-spacing:-.2px}
+.brand-sub{font-size:11px;color:var(--sub);letter-spacing:.2px}
+.top-actions{display:flex;align-items:center;gap:10px}
+.source-badge{display:flex;align-items:center;gap:6px;background:#fff;border:1px solid var(--line);border-radius:100px;padding:6px 12px;font-size:12px;color:#424245;max-width:190px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.source-badge .dot{width:7px;height:7px;border-radius:50%;background:var(--orange);flex:none}
+.source-badge.live .dot{background:var(--green);box-shadow:0 0 0 3px rgba(48,209,88,.16)}
+.source-badge.demo .dot{background:var(--orange);box-shadow:0 0 0 3px rgba(255,159,10,.16)}
+.icon-btn{width:34px;height:34px;border-radius:50%;border:1px solid var(--line);background:#fff;color:var(--blue);display:grid;place-items:center;cursor:pointer;transition:.2s}
+.icon-btn:hover{background:#f0f7ff}
+.icon-btn.spin svg{animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.container{width:100%;max-width:1080px;margin:0 auto;padding:22px 20px 40px;flex:1}
+.card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);border:.5px solid rgba(0,0,0,.03)}
+.ticker-card{padding:6px 8px;margin-bottom:18px;background:linear-gradient(120deg,#ffffff 0%,#fffaf0 100%);display:grid;grid-template-columns:repeat(5,1fr)}
+.ticker-item{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;padding:12px 12px;min-width:0}
+.ticker-item+.ticker-item{border-left:.5px solid var(--line)}
+.pair-name{font-size:13px;font-weight:700;letter-spacing:-.3px;white-space:nowrap}
+.pair-sub{font-size:10px;color:var(--sub);margin-top:2px;white-space:nowrap}
+.ticker-right{text-align:left;margin-top:7px;min-width:0}
+.ticker-price{font-size:19px;font-weight:750;letter-spacing:-.6px;font-variant-numeric:tabular-nums}
+.ticker-change{font-size:12px;font-weight:600;margin-top:2px;font-variant-numeric:tabular-nums}
+.up{color:var(--red)!important}   /* 中国习惯：涨红 */
+.down{color:var(--green)!important} /* 跌绿 */
+
+.overview{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:26px}
+.stat-card{padding:18px 20px;min-height:112px;display:flex;flex-direction:column;justify-content:space-between}
+.stat-card.accent{background:linear-gradient(145deg,#1d1d1f,#3a3a3c);color:#fff;border:none}
+.stat-card.accent .stat-foot{color:rgba(255,255,255,.6)}
+.stat-label{font-size:12px;color:var(--sub);font-weight:600;letter-spacing:.2px;display:flex;align-items:center;gap:8px}
+.stat-card.accent .stat-label{color:rgba(255,255,255,.7)}
+.stat-value{font-size:22px;font-weight:750;letter-spacing:-.5px;font-variant-numeric:tabular-nums}
+.stat-value.big{font-size:26px}
+.stat-value .cur{font-size:15px;font-weight:600;margin-right:2px;opacity:.85}
+.stat-value .unit{font-size:12px;font-weight:500;color:var(--sub)}
+.stat-foot{font-size:11px;color:var(--sub);margin-top:6px}
+.mini-tag{background:rgba(10,132,255,.12);color:var(--blue);border-radius:6px;padding:1px 7px;font-size:10px}
+
+.section-head{display:flex;align-items:flex-end;justify-content:space-between;margin:26px 2px 12px}
+.section-head h2{margin:0;font-size:20px;font-weight:750;letter-spacing:-.4px}
+.section-sub{margin:3px 0 0;font-size:12px;color:var(--sub)}
+
+.segmented{display:flex;background:#e9e9ec;border-radius:12px;padding:3px;margin-bottom:14px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.segmented::-webkit-scrollbar{display:none}
+.seg{flex:1;min-width:66px;border:0;background:transparent;color:#48484a;padding:8px 10px;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;transition:.2s;white-space:nowrap}
+.seg.active{background:#fff;color:var(--ink);box-shadow:0 1px 4px rgba(0,0,0,.1)}
+
+/* 成交明细币种切换（CORE / MMT / MERL / BABY / STX） */
+.coin-switch{display:inline-flex;flex-wrap:wrap;background:#e9e9ec;border-radius:10px;padding:3px;margin:0 20px 12px;gap:2px}
+.coin-tab{border:0;background:transparent;color:#48484a;padding:6px 13px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;transition:.2s;white-space:nowrap}
+.coin-tab.active{background:#fff;color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.1)}
+
+.card-head{display:flex;align-items:center;justify-content:space-between;padding:18px 20px 12px;gap:12px;flex-wrap:wrap}
+.card-head h3{margin:0;font-size:15px;font-weight:700;letter-spacing:-.2px}
+.muted-note{font-size:11px;color:var(--sub)}
+.table-scroll{overflow-x:auto}
+.data-table{width:100%;border-collapse:collapse;font-size:13px;font-variant-numeric:tabular-nums;min-width:700px}
+.data-table th{text-align:right;padding:10px 16px;color:var(--sub);font-weight:600;font-size:11px;border-bottom:.5px solid var(--line);white-space:nowrap}
+.data-table th:first-child,.data-table td:first-child{text-align:left;padding-left:20px}
+.data-table th:last-child,.data-table td:last-child{padding-right:20px}
+.data-table td{text-align:right;padding:13px 16px;border-bottom:.5px solid var(--line)}
+.data-table tr:last-child td{border-bottom:0}
+.rule-cell{display:flex;align-items:center;gap:9px}
+.rule-dot{width:8px;height:8px;border-radius:50%;flex:none}
+.rule-dot.r1{background:var(--blue)}
+.rule-cell .rn{font-weight:600}
+.rule-cell .rd{display:block;font-size:10px;color:var(--sub);font-weight:400;margin-top:1px}
+.return-pos{color:var(--red);font-weight:700}.return-neg{color:var(--green);font-weight:700}
+.coin-chg{font-weight:600}
+.rank-pill{display:inline-grid;place-items:center;width:24px;height:24px;border-radius:50%;font-size:11px;font-weight:700;background:#f0f0f3;color:#8e8e93}
+.rank-pill.p1{background:linear-gradient(145deg,#ffd60a,#ff9f0a);color:#fff}
+.rank-pill.p2{background:linear-gradient(145deg,#d8d8dc,#9a9aa0);color:#fff}
+.rank-pill.p3{background:linear-gradient(145deg,#d4a373,#a4763f);color:#fff}
+
+/* 五币综合积分榜 */
+.score-card{margin-top:16px}
+.score-table{min-width:720px}
+.score-table .score-cell{white-space:nowrap}
+.score-num{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:7px;font-size:12px;font-weight:800;background:#f0f0f3;color:#8e8e93}
+.score-num.n5{background:linear-gradient(145deg,#ffd60a,#ff9f0a);color:#fff}
+.score-num.n4{background:linear-gradient(145deg,#d8d8dc,#9a9aa0);color:#fff}
+.score-num.n3{background:linear-gradient(145deg,#d4a373,#a4763f);color:#fff}
+.score-rank{font-size:10px;color:var(--sub);margin-left:4px}
+.score-total{font-size:16px;font-weight:800;color:var(--blue)}
+.score-total-unit{font-size:11px;font-weight:600;margin-left:1px}
+
+.chart-card{margin-top:16px;padding-bottom:8px}
+.chart-hint{font-size:11px;color:var(--sub);margin:2px 0 10px;line-height:1.5}
+.legend{display:flex;gap:12px;font-size:11px;color:var(--sub);flex-wrap:wrap;margin-bottom:8px}
+.legend span{display:flex;align-items:center;gap:5px}
+.legend i{width:8px;height:8px;border-radius:3px;display:block}
+.chart-wrap{position:relative;height:260px;padding:0 14px 6px}
+#equityChart{width:100%;height:100%;display:block}
+.chart-empty{text-align:center;color:var(--sub);padding:40px;font-size:13px}
+
+.rules-card{padding:6px 20px}
+.rule-row{display:flex;gap:14px;padding:16px 0;border-bottom:.5px solid var(--line)}
+.rule-row:last-child{border-bottom:0}
+.rule-badge{width:32px;height:32px;border-radius:10px;display:grid;place-items:center;color:#fff;font-weight:700;flex:none;font-size:15px}
+.rule-badge.r1{background:var(--blue)}
+.rule-name{font-weight:700;font-size:14px}
+.rule-name span{font-weight:500;color:var(--sub);font-size:12px;margin-left:8px}
+.rule-desc{font-size:12px;color:#515154;margin-top:4px;line-height:1.6}
+
+.log-card{margin-top:16px;padding-bottom:10px}
+.pull-log{padding:0 20px;font-size:12px}
+.pull-item{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:.5px solid var(--line)}
+.pull-item:last-child{border-bottom:0}
+.pull-time{font-variant-numeric:tabular-nums;color:#424245}
+.pull-meta{color:var(--sub);font-size:11px}
+.pull-type{padding:2px 8px;border-radius:6px;background:#f0f7ff;color:var(--blue);font-size:10px;font-weight:600;margin-left:8px}
+.pull-type.full{background:#f3f0ff;color:var(--purple)}
+.pull-type.fallback{background:#fff6e6;color:var(--orange)}
+
+.source-card{margin-top:16px;padding-bottom:12px}
+.source-note{padding:0 20px;font-size:12px;color:#515154;line-height:1.75}
+.source-note p{margin:6px 0}
+.source-note b{color:var(--ink)}
+
+/* 买入时点参考 */
+.signals-card{padding:16px 18px}
+.strategy-banner{display:flex;align-items:flex-start;gap:10px;padding:12px 14px;background:linear-gradient(135deg,rgba(255,159,10,.12),rgba(255,69,58,.08));border-radius:12px;margin-bottom:14px}
+.strategy-tag{flex:none;background:linear-gradient(135deg,#ff9f0a,#ff453a);color:#fff;font-size:11px;font-weight:700;padding:3px 9px;border-radius:100px;letter-spacing:.3px}
+.strategy-note{color:#8a6d3b;font-size:11px;line-height:1.55}
+.signal-tabs{display:flex;gap:8px;margin-bottom:14px}
+.sig-tab{flex:1;border:none;background:var(--bg);color:var(--sub);font-size:12px;font-weight:600;padding:8px 4px;border-radius:10px;cursor:pointer;transition:.2s}
+.sig-tab.active{background:var(--ink);color:#fff}
+.signal-list{display:flex;flex-direction:column;gap:0}
+.signal-row{display:flex;align-items:center;gap:12px;padding:11px 2px;border-bottom:.5px solid var(--line)}
+.signal-row:last-child{border-bottom:none}
+.signal-time{flex:none;width:118px;font-size:12px;font-variant-numeric:tabular-nums;color:var(--ink);font-weight:600}
+.signal-main{flex:1;min-width:0}
+.signal-reason{font-size:12px;color:var(--ink);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.signal-meta{font-size:10px;color:var(--sub);margin-top:2px}
+.signal-price{flex:none;text-align:right;font-size:12px;font-variant-numeric:tabular-nums;color:var(--red);font-weight:600}
+.signal-empty{padding:22px 4px;text-align:center;color:var(--sub);font-size:12px}
+.signal-foot{margin-top:12px;padding-top:12px;border-top:.5px solid var(--line);color:var(--sub);font-size:10px;line-height:1.6}
+
+/* 成交明细表 */
+.trades-card{padding-bottom:14px}
+.trades-scroll{max-height:520px;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.trades-table{min-width:560px;font-size:12px}
+.trades-table th{position:sticky;top:0;background:var(--card);z-index:1}
+.trades-table td{padding:10px 16px}
+.trade-time{font-variant-numeric:tabular-nums;color:var(--ink);font-weight:600;white-space:nowrap}
+.trade-side{display:inline-block;min-width:38px;text-align:center;padding:2px 7px;border-radius:6px;font-size:11px;font-weight:700}
+.trade-side.buy{color:var(--red);background:rgba(255,69,58,.1)}
+.trade-side.sell{color:var(--green);background:rgba(48,209,88,.1)}
+.trade-px{font-variant-numeric:tabular-nums;font-weight:700;white-space:nowrap}
+.trade-px.buy{color:var(--red)}
+.trade-px.sell{color:var(--green)}
+.trade-amt{font-variant-numeric:tabular-nums;color:var(--sub);white-space:nowrap}
+.trade-reason{color:var(--sub);font-size:11px;white-space:nowrap}
+.trades-empty{padding:26px 4px;text-align:center;color:var(--sub);font-size:12px}
+
+.disclaimer{margin-top:24px;padding:14px 18px;background:rgba(255,159,10,.08);border-radius:12px;color:#8a6d3b;font-size:11px;line-height:1.7}
+.footer{text-align:center;color:#a1a1a6;font-size:11px;padding:0 20px 24px}
+.toast{position:fixed;left:50%;bottom:32px;transform:translate(-50%,20px);background:rgba(29,29,31,.94);color:#fff;padding:11px 20px;border-radius:100px;font-size:13px;opacity:0;pointer-events:none;transition:.25s;z-index:50;box-shadow:0 8px 30px rgba(0,0,0,.2)}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+
+@media(max-width:800px){
+  .overview{grid-template-columns:1fr 1fr}
+  .section-head h2{font-size:18px}
+  .ticker-card{display:flex;overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .ticker-item{flex:0 0 132px;padding:12px 10px}
+}
+/* 全市场 TOP10 榜单 */
+.market-card{padding-bottom:10px}
+.market-progress{padding:14px 16px 4px}
+.market-progress-bar{height:5px;border-radius:3px;background:#ececf0;overflow:hidden}
+.market-progress-bar i{display:block;height:100%;width:0;border-radius:3px;background:#0a84ff;transition:width .4s ease}
+.market-progress-text{margin-top:8px;color:var(--sub);font-size:11px}
+.market-table{min-width:560px}
+.market-table .m-rank{font-weight:600;color:var(--sub);white-space:nowrap}
+.market-table .m-medal{margin-right:4px}
+.market-table .m-sym{font-weight:600;color:var(--text);white-space:nowrap}
+.market-table .m-sub{display:block;margin-top:2px;color:var(--sub);font-size:9px;font-weight:400}
+.market-table .m-pos{color:#d70015;font-weight:600}
+.market-table .m-neg{color:#34a853;font-weight:600}
+.market-table .col-excess{font-weight:600}
+.market-empty{padding:26px 4px;text-align:center;color:var(--sub);font-size:12px}
+@media(max-width:480px){
+  .container{padding:16px 14px 32px}
+  .topbar-inner{padding:10px 14px}
+  .brand-sub{display:none}
+  .source-badge{max-width:120px;font-size:11px}
+  .overview{grid-template-columns:1fr;gap:10px}
+  .stat-card{min-height:96px;padding:16px}
+  .stat-value.big{font-size:23px}
+  .ticker-card{padding:4px 6px}
+  .ticker-item{flex:0 0 118px;padding:11px 8px}
+  .pair-name{font-size:12px}
+  .pair-sub{font-size:9px}
+  .ticker-price{font-size:16px}
+  .ticker-change{font-size:10px}
+  /* 收益表：手机端紧凑布局 */
+  .data-table{min-width:0;font-size:10px}
+  .data-table th{padding:8px 4px;font-size:9px}
+  .data-table td{padding:9px 4px}
+  .data-table th:first-child,.data-table td:first-child{padding-left:10px}
+  .data-table th:last-child,.data-table td:last-child{padding-right:10px}
+  .data-table .col-dd{display:none}
+  .rule-cell{gap:5px}
+  .rule-dot{width:6px;height:6px}
+  .rule-cell .rn{font-size:10px}
+  .rule-cell .rd{display:none}
+  .rank-pill{width:18px;height:18px;font-size:9px}
+  .chart-wrap{height:220px}
+  .legend{gap:9px;font-size:10px}
+  .signal-time{width:100px;font-size:11px}
+  .signal-price{font-size:11px}
+  .strategy-note{font-size:10px}
+  /* 成交明细：手机端紧凑布局 */
+  .trades-table{min-width:0;font-size:10px}
+  .trades-table th{padding:8px 5px;font-size:9px}
+  .trades-table td{padding:8px 5px}
+  .trades-table th:first-child,.trades-table td:first-child{padding-left:10px}
+  .trades-table th:last-child,.trades-table td:last-child{padding-right:10px}
+  .trade-time{font-size:10px;white-space:normal}
+  .trade-side{min-width:32px;padding:2px 5px;font-size:10px}
+  .trade-px,.trade-amt,.trade-reason{font-size:10px}
+  .trade-reason{white-space:normal}
+  /* 全市场 TOP10：手机端紧凑布局（隐藏次要列） */
+  .market-table{min-width:0;font-size:10px}
+  .market-table th{padding:8px 3px;font-size:9px}
+  .market-table td{padding:9px 3px}
+  .market-table th:first-child,.market-table td:first-child{padding-left:8px}
+  .market-table th:last-child,.market-table td:last-child{padding-right:8px}
+  .market-table .m-sym{font-size:10px}
+  .market-table .m-sub{font-size:8px}
+  .market-progress{padding:12px 10px 2px}
+  /* 五币综合积分榜：手机端紧凑布局 */
+  .score-table{min-width:0;font-size:10px}
+  .score-table th{padding:8px 3px;font-size:9px}
+  .score-table td{padding:9px 3px}
+  .score-table th:first-child,.score-table td:first-child{padding-left:8px}
+  .score-table th:last-child,.score-table td:last-child{padding-right:8px}
+  .score-num{width:17px;height:17px;font-size:9px;border-radius:5px}
+  .score-rank{font-size:8px;margin-left:2px}
+  .score-total{font-size:12px}
+  .score-total-unit{font-size:9px}
+  .rule-cell{gap:5px}
+}

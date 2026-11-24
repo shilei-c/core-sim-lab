@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#f5f5f7">
+<meta name="description" content="CORE 币模拟交易实验室 · 接入欧易真实行情，交易策略自动回测与收益对比">
+<title>CORE 模拟交易实验室</title>
+<link rel="stylesheet" href="styles.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🪙</text></svg>">
+</head>
+<body>
+<div class="app">
+  <!-- 顶部 -->
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <div class="brand-logo">C</div>
+        <div>
+          <div class="brand-title">CORE 实验室</div>
+          <div class="brand-sub">模拟交易 · 策略回测</div>
+        </div>
+      </div>
+      <div class="top-actions">
+        <div id="sourceBadge" class="source-badge"><span class="dot"></span><span id="sourceText">连接中…</span></div>
+        <button id="refreshBtn" class="icon-btn" title="刷新数据" aria-label="刷新数据">
+          <svg viewBox="0 0 24 24" width="18" height="18"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M20 11a8 8 0 1 0-2.3 6M20 4v7h-7"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- 行情条：CORE 与四个附加币实时行情 -->
+    <section class="ticker-card card">
+      <div class="ticker-item">
+        <div class="ticker-info">
+          <div class="pair-name">CORE / USDT</div>
+          <div class="pair-sub">欧易现货 · 实时行情</div>
+        </div>
+        <div class="ticker-right">
+          <div id="tickerPrice" class="ticker-price">—</div>
+          <div id="tickerChange" class="ticker-change">—</div>
+        </div>
+      </div>
+      <div class="ticker-item">
+        <div class="ticker-info">
+          <div class="pair-name">MMT / USDT</div>
+          <div id="mmtSource" class="pair-sub">实时行情</div>
+        </div>
+        <div class="ticker-right">
+          <div id="mmtPrice" class="ticker-price">—</div>
+          <div id="mmtChange" class="ticker-change">—</div>
+        </div>
+      </div>
+      <div class="ticker-item">
+        <div class="ticker-info">
+          <div class="pair-name">MERL / USDT</div>
+          <div id="merlSource" class="pair-sub">实时行情</div>
+        </div>
+        <div class="ticker-right">
+          <div id="merlPrice" class="ticker-price">—</div>
+          <div id="merlChange" class="ticker-change">—</div>
+        </div>
+      </div>
+      <div class="ticker-item">
+        <div class="ticker-info">
+          <div class="pair-name">BABY / USDT</div>
+          <div id="babySource" class="pair-sub">实时行情</div>
+        </div>
+        <div class="ticker-right">
+          <div id="babyPrice" class="ticker-price">—</div>
+          <div id="babyChange" class="ticker-change">—</div>
+        </div>
+      </div>
+      <div class="ticker-item">
+        <div class="ticker-info">
+          <div class="pair-name">STX / USDT</div>
+          <div id="stxSource" class="pair-sub">实时行情</div>
+        </div>
+        <div class="ticker-right">
+          <div id="stxPrice" class="ticker-price">—</div>
+          <div id="stxChange" class="ticker-change">—</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 概览 -->
+    <section class="overview">
+      <div class="card stat-card">
+        <div class="stat-label">最佳策略收益 <span id="bestRuleTag" class="mini-tag">—</span></div>
+        <div id="bestReturn" class="stat-value big">—</div>
+        <div id="bestPeriod" class="stat-foot">—</div>
+      </div>
+      <div class="card stat-card">
+        <div class="stat-label">行情采集（今日）</div>
+        <div id="pullsToday" class="stat-value big">—<span class="unit"> 次</span></div>
+        <div class="stat-foot">目标 ≥ <span id="reqPulls">5</span> 次 · 每 1 分钟自动采集</div>
+      </div>
+    </section>
+
+    <!-- 窗口切换 -->
+    <section class="section-head">
+      <div>
+        <h2>策略收益总览</h2>
+        <p class="section-sub">CORE / MMT / MERL / BABY / STX 五币并列 · 同一自由模式信号内核 · 排名按超额收益（区间收益 − 币价涨跌）由高到低 · 每日 08:00 / 20:00 自动刷新</p>
+      </div>
+    </section>
+    <div class="segmented" id="windowTabs" role="tablist" aria-label="回测区间">
+      <button class="seg" data-key="7d" role="tab">1 周</button>
+      <button class="seg" data-key="1m" role="tab">1 个月</button>
+      <button class="seg active" data-key="3m" role="tab">3 个月</button>
+      <button class="seg" data-key="6m" role="tab">6 个月</button>
+      <button class="seg" data-key="12m" role="tab">12 个月</button>
+    </div>
+
+    <!-- 收益表 -->
+    <section class="card table-card">
+      <div class="card-head">
+        <h3 id="tableTitle">最近 3 个月 · 回测结果</h3>
+        <span id="dataNote" class="muted-note">—</span>
+      </div>
+      <div class="table-scroll">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>币种 / 策略</th><th>区间收益</th><th>币价涨跌</th><th class="col-dd">最大回撤</th><th>成交次数</th><th>排名</th>
+            </tr>
+          </thead>
+          <tbody id="resultBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 五币综合积分榜 -->
+    <section class="card table-card score-card">
+      <div class="card-head">
+        <h3>五币综合积分榜</h3>
+        <span id="scoreMeta" class="muted-note">五区间累计 · 满分 25 分</span>
+      </div>
+      <div class="table-scroll">
+        <table class="data-table score-table">
+          <thead>
+            <tr>
+              <th>综合排名</th><th>币种</th><th>1周</th><th>1个月</th><th>3个月</th><th>6个月</th><th>12个月</th><th>总分</th>
+            </tr>
+          </thead>
+          <tbody id="scoreBody"><tr><td colspan="8" style="text-align:center;padding:20px;color:var(--sub)">回测数据加载中…</td></tr></tbody>
+        </table>
+      </div>
+      <div class="signal-foot">每个区间按超额收益（区间收益 − 币价涨跌）排名计分：第 1 名 5 分、第 2 名 4 分、第 3 名 3 分、第 4 名 2 分、第 5 名 1 分；五区间得分累加为总分（满分 25 分），总分越高综合排名越靠前。</div>
+    </section>
+
+    <!-- 图表 -->
+    <section class="card chart-card">
+      <div class="card-head">
+        <h3>币的价格曲线</h3>
+        <p class="chart-hint">以所选区间起点为基准（=100）的归一化走势，便于同屏对比各币涨跌；图例为当前价格</p>
+      </div>
+      <div class="legend" id="chartLegend"></div>
+      <div class="chart-wrap"><canvas id="equityChart" height="260"></canvas></div>
+      <div id="chartEmpty" class="chart-empty" hidden>暂无足够数据绘制曲线</div>
+    </section>
+
+    <!-- 买入时点参考 -->
+    <section class="section-head">
+      <div>
+        <h2>买入时点参考</h2>
+        <p class="section-sub">激进版策略内核说明 · 逐笔成交见下方明细栏目</p>
+      </div>
+    </section>
+    <section class="card signals-card">
+      <div class="strategy-banner">
+        <span class="strategy-tag">激进版策略</span>
+        <span id="strategyNote" class="strategy-note">—</span>
+      </div>
+      <div id="signalList" class="signal-list">加载中…</div>
+    </section>
+
+    <!-- 自由模式成交明细 -->
+    <section class="section-head">
+      <div>
+        <h2>自由模式 · 每次成交明细</h2>
+        <p class="section-sub">逐笔虚拟成交的时间与价格（北京时间 UTC+8）· CORE / MMT / MERL / BABY / STX 可切换</p>
+      </div>
+    </section>
+    <section class="card trades-card">
+      <div class="card-head">
+        <h3 id="tradesTitle">每次成交明细</h3>
+        <span id="tradesMeta" class="muted-note">—</span>
+      </div>
+      <div class="coin-switch" id="coinSwitch" role="tablist" aria-label="成交明细币种">
+        <button class="coin-tab active" data-coin="CORE" role="tab">CORE</button>
+        <button class="coin-tab" data-coin="MMT" role="tab">MMT</button>
+        <button class="coin-tab" data-coin="MERL" role="tab">MERL</button>
+        <button class="coin-tab" data-coin="BABY" role="tab">BABY</button>
+        <button class="coin-tab" data-coin="STX" role="tab">STX</button>
+      </div>
+      <div class="table-scroll trades-scroll">
+        <table class="data-table trades-table">
+          <thead>
+            <tr><th>成交时间（北京）</th><th>方向</th><th>成交价</th><th>数量</th><th>信号原因</th></tr>
+          </thead>
+          <tbody id="tradesBody"></tbody>
+        </table>
+      </div>
+      <div class="signal-foot">按所选回测区间统计，最新成交排最前。买入时间为策略虚拟成交时刻，价格为含滑点的模拟成交价，仅用于研究参考，不构成投资建议。</div>
+    </section>
+
+    <!-- 全市场 TOP10 -->
+    <section class="section-head">
+      <div>
+        <h2>自由模式 · 近 1 年收益 TOP10</h2>
+        <p class="section-sub">扫描欧易现货 USDT 币种池 · 同一自由模式策略回测 · 按收益率排序</p>
+      </div>
+    </section>
+    <section class="card market-card">
+      <div class="card-head">
+        <h3>全市场收益榜</h3>
+        <span id="marketMeta" class="muted-note">加载中…</span>
+      </div>
+      <div id="marketProgress" class="market-progress" hidden>
+        <div class="market-progress-bar"><i id="marketProgressBar"></i></div>
+        <div id="marketProgressText" class="market-progress-text">正在扫描币种…</div>
+      </div>
+      <div class="table-scroll">
+        <table class="data-table market-table">
+          <thead>
+            <tr><th>排名</th><th>币种</th><th>策略收益</th><th>币价涨跌</th><th class="col-excess">超额收益</th><th class="col-dd">最大回撤</th><th>成交</th></tr>
+          </thead>
+          <tbody id="marketBody"><tr><td colspan="7" class="market-empty">正在加载榜单…</td></tr></tbody>
+        </table>
+      </div>
+      <div class="signal-foot">扫描范围为欧易 OKX 现货 USDT 主流币种池；行情自动选取当前可达的真实数据源（OKX 优先，不可用时降级 Binance / Gate.io），榜单中标注实际来源。榜单按超额收益（区间收益 − 币价涨跌）由高到低排序，超额收益越高代表策略跑赢同期持有币价的幅度越大。收益为按自由模式虚拟回测的结果，非实盘收益，不构成投资建议。</div>
+    </section>
+
+    <!-- 规则说明 -->
+    <section class="section-head">
+      <div><h2>策略规则</h2><p class="section-sub">「激进版」信号内核：EMA8/21 金叉入场 + 2.2ATR 止损 + 12% 移动止损 + 卖出后冷却约2.7天（基于五币历史回测寻优）</p></div>
+    </section>
+    <section class="card rules-card">
+      <div class="rule-row">
+        <div class="rule-badge r1">①</div>
+        <div class="rule-content"><div class="rule-name">自由模式 <span>每日无交易次数限制</span></div><div class="rule-desc">仅在出现买入/卖出信号时成交，不强制交易；信号稀疏时可能长期空仓。</div></div>
+      </div>
+    </section>
+
+    <!-- 采集日志 -->
+    <section class="card log-card">
+      <div class="card-head"><h3>后台自动采集日志</h3><span class="muted-note">最近 12 次</span></div>
+      <div id="pullLog" class="pull-log">加载中…</div>
+    </section>
+
+    <section class="card source-card">
+      <div class="card-head"><h3>数据源说明</h3></div>
+      <div class="source-note">
+        <p><b>优先接入：</b>页面打开时浏览器会直连欧易 OKX 公共行情 API（CORE-USDT），若您的网络可访问欧易则自动使用欧易真实 K 线重算全部回测，状态栏显示「OKX 欧易直连」。</p>
+        <p><b>自动备份：</b>若网络无法访问欧易，则由云端后台每 1 分钟自动采集（每日最高 1440 次），并按 OKX → Binance → Gate.io 顺序自动切换真实行情源；仅当全部不可达时才使用明确标注的演示数据。</p>
+      </div>
+    </section>
+
+    <div class="disclaimer">
+      本页面为教学与演示用途的模拟交易系统，所有资金均为虚拟。行情来自公开数据源，回测结果不代表未来表现，不构成任何投资建议。
+    </div>
+  </main>
+  <footer class="footer">CORE Sim Lab · 全免费在线运行 · 数据每 1 分钟自动刷新</footer>
+</div>
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+<script>window.STATIC_SITE=true;</script>
+<script src="engine.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,39 @@
+name: Rebuild CORE static data
+
+# 每天自动生成最新数据并提交到 docs/，GitHub Pages 会自动发布更新。
+# cron 使用 UTC：00:00 / 12:00 = 北京时间 08:00 / 20:00
+on:
+  schedule:
+    - cron: '0 0,12 * * *'
+  workflow_dispatch:   # 允许在 Actions 页面手动触发
+
+permissions:
+  contents: write
+
+jobs:
+  rebuild:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Build static site data
+        run: node build-static.js
+
+      - name: Commit generated data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add docs data/market-cache.json data/multicoin-cache.json data/ranking-cache.json data/live-ticker-cache.json
+          if git diff --cached --quiet; then
+            echo "No data changes to commit"
+          else
+            git commit -m "chore: rebuild static data $(date -u +'%Y-%m-%d %H:%M UTC')"
+            git push
+          fi
