@@ -2,7 +2,7 @@
 (function () {
   const $ = id => document.getElementById(id);
   let report = null;
-  let multiReport = null;            // MMT / MERL / BABY / STX 回测数据
+  let multiReport = null;            // MMT / MERL / BABY / STX / BTC 回测数据
   let marketData = null;
   let marketPollCount = 0;
   let multiPollCount = 0;
@@ -13,8 +13,8 @@
   let directCandles = {};            // 浏览器直连拉取的K线缓存 {coin: candles}
   const COLORS = { R1: '#0a84ff' };
   const NAMES = { R1: '自由模式' };
-  const COIN_COLORS = { CORE: '#0a84ff', MMT: '#bf5af2', MERL: '#ff9f0a', BABY: '#30d158', STX: '#ff453a' };
-  const COINS = ['CORE', 'MMT', 'MERL', 'BABY', 'STX'];
+  const COIN_COLORS = { CORE: '#0a84ff', MMT: '#bf5af2', MERL: '#ff9f0a', BABY: '#30d158', STX: '#ff453a', BTC: '#f7931a' };
+  const COINS = ['CORE', 'MMT', 'MERL', 'BABY', 'STX', 'BTC'];
 
   function toast(msg) {
     const t = $('toast'); t.textContent = msg; t.classList.add('show');
@@ -107,7 +107,7 @@
     $('bestReturn').textContent = (best.returnPct > 0 ? '+' : '') + best.returnPct.toFixed(2) + '%';
     $('bestReturn').className = 'stat-value big ' + signCls(best.returnPct);
     $('bestRuleTag').textContent = NAMES[best.rule] || best.rule;
-    $('bestPeriod').textContent = best.windowLabel + ' · 五币中最高';
+    $('bestPeriod').textContent = best.windowLabel + ' · ' + COINS.length + ' 币中最高';
   }
 
   /** 取某币在指定窗口的自由模式（R1）回测结果 */
@@ -120,7 +120,7 @@
 
   function renderTable() {
     const w = (report && report.windows || []).find(x => x.key === currentWindow);
-    $('tableTitle').textContent = (w ? w.label : '') + ' · 五币回测结果';
+    $('tableTitle').textContent = (w ? w.label : '') + ' · ' + COINS.length + ' 币回测结果';
     const items = COINS.map(coin => ({ coin, r: coinResult(coin, currentWindow) })).filter(x => x.r);
     if (!items.length) {
       $('dataNote').textContent = '—';
@@ -151,8 +151,8 @@
   }
 
   /**
-   * 五币综合积分榜：对 1周/1个月/3个月/6个月/12个月 五个区间，
-   * 各自按超额收益（区间收益 − 币价涨跌）排名，第1名5分、第2名4分…第5名1分；
+   * 多币综合积分榜：对 1周/1个月/3个月/6个月/12个月 五个区间，
+   * 各自按超额收益（区间收益 − 币价涨跌）排名，第1名 N 分、第2名 N-1 分…最后1名1分（N=币数）；
    * 五区间得分累加为总分，按总分由高到低排名（同分按超额收益合计降序）。
    */
   const SCORE_WINDOWS = [
@@ -166,10 +166,10 @@
     const body = $('scoreBody');
     if (!body) return;
     const excess = r => Number(r.returnPct || 0) - Number(r.coinChangePct || 0);
-    // 全部五币在五个区间都有数据才渲染，避免加载中给出误导性积分
+    // 全部币种在五个区间都有数据才渲染，避免加载中给出误导性积分
     const ready = COINS.every(c => SCORE_WINDOWS.every(w => coinResult(c, w.key)));
     if (!ready) {
-      $('scoreMeta').textContent = '五币数据同步中…';
+      $('scoreMeta').textContent = '多币数据同步中…';
       body.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:20px;color:var(--sub)">回测数据加载中…</td></tr>';
       return;
     }
@@ -180,7 +180,7 @@
       const ranked = COINS.map(c => ({ coin: c, r: coinResult(c, w.key) }))
         .sort((a, b) => excess(b.r) - excess(a.r));
       ranked.forEach((x, i) => {
-        const score = 5 - i;              // 第1名5分…第5名1分
+        const score = COINS.length - i;   // 第1名 N 分…第 N 名1分（N=币数）
         const rank = i + 1;
         perCoin[x.coin].wins[w.key] = { score, rank };
         perCoin[x.coin].total += score;
@@ -189,7 +189,7 @@
     });
     const rankedCoins = COINS.slice().sort((a, b) =>
       perCoin[b].total - perCoin[a].total || perCoin[b].excessSum - perCoin[a].excessSum);
-    const maxTotal = 5 * SCORE_WINDOWS.length;
+    const maxTotal = COINS.length * SCORE_WINDOWS.length;
     $('scoreMeta').textContent = '五区间累计 · 满分 ' + maxTotal + ' 分';
     body.innerHTML = rankedCoins.map((coin, idx) => {
       const p = idx + 1;
@@ -333,13 +333,13 @@
     }
   }
 
-  /** 加载附加币（MMT / MERL / BABY / STX）回测数据；首次后台同步时轮询直到就绪 */
+  /** 加载附加币（MMT / MERL / BABY / STX / BTC）回测数据；首次后台同步时轮询直到就绪 */
   async function loadMulti(force) {
     try {
       const d = await api('/api/multicoin' + (force ? '?refresh=1' : ''));
       multiReport = d;
       renderTable();
-      renderScoreTable();   // 积分榜依赖五币数据，多币就绪后重算
+      renderScoreTable();   // 积分榜依赖多币数据，多币就绪后重算
       renderTrades();
       drawChart();   // 币价曲线依赖多币数据，加载后需重绘
       if (d.status === 'computing' && multiPollCount < 60) {
@@ -458,7 +458,8 @@
       { sym: 'MMT', price: 'mmtPrice', change: 'mmtChange', src: 'mmtSource' },
       { sym: 'MERL', price: 'merlPrice', change: 'merlChange', src: 'merlSource' },
       { sym: 'BABY', price: 'babyPrice', change: 'babyChange', src: 'babySource' },
-      { sym: 'STX', price: 'stxPrice', change: 'stxChange', src: 'stxSource' }
+      { sym: 'STX', price: 'stxPrice', change: 'stxChange', src: 'stxSource' },
+      { sym: 'BTC', price: 'btcPrice', change: 'btcChange', src: 'btcSource' }
     ];
     for (const m of map) {
       const c = d.coins && d.coins[m.sym];
@@ -744,7 +745,7 @@
     if (touched) {
       signalReport = Object.assign({}, signalReport, { generatedAt: Date.now(), status: 'ready' });
       renderSignal();
-      toast('实时信号已按交易所最新K线重算（' + touched + '/5 币）');
+      toast('实时信号已按交易所最新K线重算（' + touched + '/' + COINS.length + ' 币）');
     }
     return touched > 0;
   }
@@ -800,7 +801,7 @@
     const delay = Math.max(1000, target - bjNow);
     setTimeout(async () => {
       try { await loadBacktest(); toast('收益数据已按每 15 分钟定时自动刷新'); } catch (_) {}
-      loadMulti(true);                               // 同步刷新 MMT / MERL / BABY / STX 回测
+      loadMulti(true);                               // 同步刷新 MMT / MERL / BABY / STX / BTC 回测
       loadLiveTickers();                             // 同步刷新实时价格
       loadSignal();                                  // 同步刷新实时交易信号
       schedulePeriodicBacktest();                    // 调度下一次

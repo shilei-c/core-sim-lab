@@ -31,7 +31,7 @@
   </header>
 
   <main class="container">
-    <!-- 行情条：CORE 与四个附加币实时行情 -->
+    <!-- 行情条：CORE 与五个附加币实时行情 -->
     <section class="ticker-card card">
       <div class="ticker-item">
         <div class="ticker-info">
@@ -83,6 +83,16 @@
           <div id="stxChange" class="ticker-change">—</div>
         </div>
       </div>
+      <div class="ticker-item">
+        <div class="ticker-info">
+          <div class="pair-name">BTC / USDT</div>
+          <div id="btcSource" class="pair-sub">实时行情</div>
+        </div>
+        <div class="ticker-right">
+          <div id="btcPrice" class="ticker-price">—</div>
+          <div id="btcChange" class="ticker-change">—</div>
+        </div>
+      </div>
     </section>
 
     <!-- 实时交易信号 -->
@@ -100,6 +110,7 @@
           <button class="coin-tab" data-coin="MERL" role="tab">MERL</button>
           <button class="coin-tab" data-coin="BABY" role="tab">BABY</button>
           <button class="coin-tab" data-coin="STX" role="tab">STX</button>
+          <button class="coin-tab" data-coin="BTC" role="tab">BTC</button>
         </div>
         <div id="signalMeta" class="muted-note">加载中…</div>
       </div>
@@ -157,7 +168,7 @@
     <section class="section-head">
       <div>
         <h2>策略收益总览</h2>
-        <p class="section-sub">CORE / MMT / MERL / BABY / STX 五币并列 · 同一自由模式信号内核 · 区间收益＝期末金额（价格×持仓数量＋现金）÷ 期初金额 − 1 · 排名按超额收益（区间收益 − 币价涨跌）由高到低 · 每 15 分钟自动刷新</p>
+        <p class="section-sub">CORE / MMT / MERL / BABY / STX / BTC 六币并列 · 同一自由模式信号内核 · 区间收益＝期末金额（价格×持仓数量＋现金）÷ 期初金额 − 1 · 排名按超额收益（区间收益 − 币价涨跌）由高到低 · 每 15 分钟自动刷新</p>
       </div>
     </section>
     <div class="segmented" id="windowTabs" role="tablist" aria-label="回测区间">
@@ -186,11 +197,11 @@
       </div>
     </section>
 
-    <!-- 五币综合积分榜 -->
+    <!-- 多币综合积分榜 -->
     <section class="card table-card score-card">
       <div class="card-head">
-        <h3>五币综合积分榜</h3>
-        <span id="scoreMeta" class="muted-note">五区间累计 · 满分 25 分</span>
+        <h3>六币综合积分榜</h3>
+        <span id="scoreMeta" class="muted-note">五区间累计 · 满分 30 分</span>
       </div>
       <div class="table-scroll">
         <table class="data-table score-table">
@@ -202,7 +213,7 @@
           <tbody id="scoreBody"><tr><td colspan="8" style="text-align:center;padding:20px;color:var(--sub)">回测数据加载中…</td></tr></tbody>
         </table>
       </div>
-      <div class="signal-foot">每个区间按超额收益（区间收益 − 币价涨跌）排名计分：第 1 名 5 分、第 2 名 4 分、第 3 名 3 分、第 4 名 2 分、第 5 名 1 分；五区间得分累加为总分（满分 25 分），总分越高综合排名越靠前。</div>
+      <div class="signal-foot">每个区间按超额收益（区间收益 − 币价涨跌）排名计分：第 1 名 6 分、第 2 名 5 分、第 3 名 4 分、第 4 名 3 分、第 5 名 2 分、第 6 名 1 分；五区间得分累加为总分（满分 30 分），总分越高综合排名越靠前。</div>
     </section>
 
     <!-- 图表 -->
@@ -235,7 +246,7 @@
     <section class="section-head">
       <div>
         <h2>自由模式 · 每次成交明细</h2>
-        <p class="section-sub">逐笔虚拟成交的时间与价格（北京时间 UTC+8）· CORE / MMT / MERL / BABY / STX 可切换</p>
+        <p class="section-sub">逐笔虚拟成交的时间与价格（北京时间 UTC+8）· CORE / MMT / MERL / BABY / STX / BTC 可切换</p>
       </div>
     </section>
     <section class="card trades-card">
@@ -249,6 +260,7 @@
         <button class="coin-tab" data-coin="MERL" role="tab">MERL</button>
         <button class="coin-tab" data-coin="BABY" role="tab">BABY</button>
         <button class="coin-tab" data-coin="STX" role="tab">STX</button>
+        <button class="coin-tab" data-coin="BTC" role="tab">BTC</button>
       </div>
       <div class="table-scroll trades-scroll">
         <table class="data-table trades-table">

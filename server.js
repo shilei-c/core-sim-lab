@@ -110,13 +110,13 @@ const server = http.createServer(async (req, res) => {
       return json(res, 200, ranking.get(force));
     }
 
-    // 附加币种（MMT / MERL）多窗口回测：与 CORE 结构一致，供收益总览与成交明细使用
+    // 附加币种（MMT / MERL / BABY / STX / BTC）多窗口回测：与 CORE 结构一致，供收益总览与成交明细使用
     if (pathname === '/api/multicoin') {
       const force = urlObj.searchParams.get('refresh') === '1';
       return json(res, 200, multicoin.get(force));
     }
 
-    // 顶部行情条：MMT / MERL 实时价格与 24h 涨跌（多源降级，独立缓存）
+    // 顶部行情条：MMT / MERL / BABY / STX / BTC 实时价格与 24h 涨跌（多源降级，独立缓存）
     if (pathname === '/api/live-ticker') {
       const force = urlObj.searchParams.get('refresh') === '1';
       return json(res, 200, liveTicker.get(force));
