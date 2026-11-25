@@ -47,14 +47,16 @@ async function buildBacktest() {
     data.init();                       // 载入已有缓存（含定时器，已 unref 不阻塞退出）
     await data.fullRefresh(true);      // 强制全量刷新，串行等待完成
     const candles = data.getCandles();
-    const report = engine.backtestAll(candles);
+    const livePrice = data.status().price;   // 最新实时价：覆盖最后一根未走完K线
+    const report = engine.backtestAll(candles, livePrice);
     writeJson('backtest.json', Object.assign({ generatedAt: Date.now(), source: data.status() }, report));
     writeJson('status.json', Object.assign({ serverTime: Date.now() }, data.status()));
   } catch (e) {
     console.error('[build] backtest refresh failed:', e.message);
     try {
       const j = JSON.parse(fs.readFileSync(path.join(CACHE, 'market-cache.json'), 'utf8'));
-      const report = engine.backtestAll(j.candles);
+      const fallbackPrice = (j.ticker && j.ticker.price) || (j.candles && j.candles.length ? j.candles[j.candles.length - 1].c : 0);
+      const report = engine.backtestAll(j.candles, fallbackPrice);
       writeJson('backtest.json', Object.assign({ generatedAt: Date.now(), source: data.status() }, report));
       writeJson('status.json', Object.assign({ serverTime: Date.now() }, data.status()));
     } catch (e2) { console.error('[build] backtest fallback failed:', e2.message); }
@@ -116,8 +118,8 @@ function copyAssets() {
   copyAssets();
   await buildBacktest();
   await buildRanking();
+  await buildLiveTicker();   // 先刷新实时价，供多币回测覆盖最后一根K线使用
   await buildMulticoin();
-  await buildLiveTicker();
   console.log('[build] done -> ' + DOCS);
   process.exit(0);
 })().catch(e => { console.error('[build] FATAL', e); process.exit(1); });

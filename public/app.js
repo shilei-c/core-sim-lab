@@ -238,7 +238,8 @@
     const total = (r1 && r1.ledgerTotal != null) ? r1.ledgerTotal : ledger.length;
     const buyTotal = (r1 && r1.buyTotal != null) ? r1.buyTotal : 0;
     const srcName = src && src.sourceName ? ' · ' + src.sourceName : '';
-    $('tradesMeta').textContent = '共 ' + total + ' 笔成交 · 其中买入 ' + buyTotal + ' 笔' + srcName;
+    const liveNote = (r1 && r1.livePriceApplied > 0) ? ' · 最近一笔已按实时价 ' + fmtPrice(r1.livePriceApplied) + ' 重算' : '';
+    $('tradesMeta').textContent = '共 ' + total + ' 笔成交 · 其中买入 ' + buyTotal + ' 笔' + srcName + liveNote;
 
     const body = $('tradesBody');
     if (!ledger.length) {
@@ -547,8 +548,8 @@
         all.forEach(c => map.set(c.t, c));
         const candles = Array.from(map.values()).sort((a, b) => a.t - b.t);
 
-        // 用欧易数据在浏览器内重算全部回测
-        const local = window.CoreEngine.backtestAll(candles);
+        // 用欧易数据在浏览器内重算全部回测；用 ticker 实时价覆盖最后一根未走完K线
+        const local = window.CoreEngine.backtestAll(candles, price);
         report = Object.assign({}, local, {
           generatedAt: Date.now(),
           source: Object.assign({}, report ? report.source : {}, {
