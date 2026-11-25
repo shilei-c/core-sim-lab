@@ -26,11 +26,17 @@ jobs:
       - name: Build static site data
         run: node build-static.js
 
+      - name: Notify new CORE trade to WeCom bot
+        continue-on-error: true   # 推送失败不阻断数据重建与提交
+        env:
+          WECOM_WEBHOOK: ${{ secrets.WECOM_WEBHOOK }}
+        run: node notify-trade.js
+
       - name: Commit generated data
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add docs data/market-cache.json data/multicoin-cache.json data/ranking-cache.json data/live-ticker-cache.json
+          git add docs data/market-cache.json data/multicoin-cache.json data/ranking-cache.json data/live-ticker-cache.json data/trade-notify-state.json
           if git diff --cached --quiet; then
             echo "No data changes to commit"
           else
