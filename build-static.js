@@ -125,6 +125,60 @@ function copyAssets() {
   console.log('[build] copied static assets -> docs/');
 }
 
+/**
+ * 构建后自检 + 自动补救：确保每小时重建都产出完整数据。
+ * 关键数据为空时强制重算一次；补救后仍异常则返回问题列表，
+ * 由主流程以非零码退出，阻止 workflow 提交空数据覆盖线上历史数据。
+ */
+async function verifyAndHeal() {
+  const problems = [];
+
+  // 1) 近 1 年 TOP10 榜单
+  try {
+    const r = JSON.parse(fs.readFileSync(path.join(OUT_DATA, 'ranking.json'), 'utf8'));
+    if (!r.top || !r.top.length) {
+      console.warn('[verify] ranking.json 为空，自动重算一次...');
+      const r2 = await ranking.compute();
+      if (r2 && r2.top && r2.top.length) {
+        writeJson('ranking.json', r2);
+        console.log('[verify] ranking 已恢复 ' + r2.top.length + ' 条');
+      } else {
+        cacheFallback('ranking-cache.json', 'ranking.json');
+        problems.push('ranking.top 为空且重算无果');
+      }
+    } else {
+      console.log('[verify] ranking ok (' + r.top.length + ' 条, ' + (r.sourceName || '-') + ')');
+    }
+  } catch (e) { problems.push('ranking 校验失败: ' + e.message); }
+
+  // 2) 五币实时信号
+  try {
+    const s = JSON.parse(fs.readFileSync(path.join(OUT_DATA, 'signal.json'), 'utf8'));
+    const keys = Object.keys(s.coins || {});
+    const bad = keys.filter(k => !s.coins[k] || s.coins[k].error);
+    if (!keys.length || bad.length === keys.length) {
+      console.warn('[verify] signal.json 五币全部异常，自动重算一次...');
+      const s2 = await signal.compute(true);
+      const good = Object.keys((s2 && s2.coins) || {}).filter(k => s2.coins[k] && !s2.coins[k].error);
+      if (good.length) {
+        writeJson('signal.json', s2);
+        console.log('[verify] signal 已恢复 ' + good.length + ' 币');
+      } else problems.push('signal 五币全部异常且重算无果');
+    } else {
+      console.log('[verify] signal ok (' + keys.length + ' 币, 异常 ' + bad.length + ')');
+    }
+  } catch (e) { problems.push('signal 校验失败: ' + e.message); }
+
+  // 3) 其余关键文件存在且非空
+  for (const name of ['backtest.json', 'multicoin.json', 'live-ticker.json']) {
+    try {
+      if (fs.statSync(path.join(OUT_DATA, name)).size < 20) problems.push(name + ' 内容异常');
+    } catch (_) { problems.push(name + ' 缺失'); }
+  }
+
+  return problems;
+}
+
 (async () => {
   console.log('[build] start ' + new Date().toISOString());
   copyAssets();
@@ -133,6 +187,10 @@ function copyAssets() {
   await buildLiveTicker();   // 先刷新实时价，供多币回测覆盖最后一根K线使用
   await buildMulticoin();
   await buildSignal();       // 实时交易信号（五币），依赖实时价与K线
-  console.log('[build] done -> ' + DOCS);
-  process.exit(0);
+  const problems = await verifyAndHeal();   // 自检 + 补救，确保这次重建数据完整
+  console.log('[build] done -> ' + DOCS + (problems.length
+    ? ' | 自检异常: ' + problems.join('; ')
+    : ' | 自检通过'));
+  // 关键数据不可用时以非零码退出，阻止 workflow 提交空数据覆盖线上历史数据
+  process.exit(problems.length ? 1 : 0);
 })().catch(e => { console.error('[build] FATAL', e); process.exit(1); });
