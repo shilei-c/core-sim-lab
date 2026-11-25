@@ -1,8 +1,9 @@
 {
-  "fingerprint": "0_buy",
-  "beijing": "2026-11-24 04:00",
+  "fingerprint": "1795377600000_sell",
+  "beijing": "2026-11-23 04:00",
   "side": "sell",
   "price": 0.01007998,
-  "recordedAt": 1795596730183,
-  "note": "临时验证用旧指纹，推送后由脚本自动写回最新"
+  "notifiedAt": 1795377600000,
+  "channel": "Server酱（个人微信）",
+  "message": "验证推送已完成，恢复至最新成交基线"
 }
