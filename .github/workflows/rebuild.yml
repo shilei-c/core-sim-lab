@@ -1,10 +1,10 @@
 name: Rebuild CORE static data
 
-# 每小时自动生成最新数据并提交到 docs/，GitHub Pages 会自动发布更新。
-# cron 使用 UTC：0 * * * * = 每小时整点（北京时间同样是整点）
+# 每 15 分钟自动生成最新数据、检查新成交并提交到 docs/，GitHub Pages 会自动发布更新。
+# cron 使用 UTC：01/16/31/46 分触发，等价于每 15 分钟一次，且避开整点拥堵（GitHub 定时任务在整点容易排队延迟）
 on:
   schedule:
-    - cron: '0 * * * *'
+    - cron: '1,16,31,46 * * * *'
   workflow_dispatch:   # 允许在 Actions 页面手动触发
 
 permissions:

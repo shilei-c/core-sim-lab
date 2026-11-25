@@ -507,7 +507,7 @@
         await loadLiveTickers();
         await loadSignal();
         await tryOkxDirect();
-        toast('已重新载入最新数据（每小时自动更新）');
+        toast('已重新载入最新数据（每 15 分钟自动更新）');
       } else {
         await api('/api/refresh', { method: 'POST' });
         await loadBacktest();
@@ -712,7 +712,7 @@
     return null;
   }
 
-  /** 浏览器直连重算：拉最新K线+实时价，用同一引擎算信号，让信号不依赖每小时静态更新 */
+  /** 浏览器直连重算：拉最新K线+实时价，用同一引擎算信号，让信号不依赖静态更新 */
   async function refreshSignalDirect() {
     const E = window.CoreEngine;
     if (!E || !E.computeLiveSignal) return false;
@@ -788,22 +788,23 @@
   setInterval(loadStatus, 60000);
   setInterval(loadLiveTickers, 60000);
 
-  // 每小时自动刷新一次收益数据（整点后 5 分钟，给 Actions 留出生成与发布时间，页面打开时生效）
+  // 每 15 分钟自动刷新一次收益数据（云端在 1/16/31/46 分重建，页面延后 2 分钟拉取，页面打开时生效）
   // 用 UTC getter 读取平移 +8h 后的时间，等价于北京时间，避免本地时区差异
-  function scheduleHourlyBacktest() {
+  function schedulePeriodicBacktest() {
     const offset = 8 * 3600 * 1000;
     const bjNow = Date.now() + offset;              // 以 UTC 刻度表示的“北京时间”
     const bj = new Date(bjNow);
-    // 下一个整点 + 5 分钟
-    const target = Date.UTC(bj.getUTCFullYear(), bj.getUTCMonth(), bj.getUTCDate(), bj.getUTCHours() + 1, 5, 0, 0);
+    // 下一个 15 分钟边界（00/15/30/45）+ 2 分钟，给 Actions 留出生成与发布时间
+    const nextBoundary = (Math.floor(bj.getUTCMinutes() / 15) + 1) * 15;
+    const target = Date.UTC(bj.getUTCFullYear(), bj.getUTCMonth(), bj.getUTCDate(), bj.getUTCHours(), nextBoundary, 2, 0);
     const delay = Math.max(1000, target - bjNow);
     setTimeout(async () => {
-      try { await loadBacktest(); toast('收益数据已按每小时定时自动刷新'); } catch (_) {}
+      try { await loadBacktest(); toast('收益数据已按每 15 分钟定时自动刷新'); } catch (_) {}
       loadMulti(true);                               // 同步刷新 MMT / MERL / BABY / STX 回测
       loadLiveTickers();                             // 同步刷新实时价格
       loadSignal();                                  // 同步刷新实时交易信号
-      scheduleHourlyBacktest();                      // 调度下一次
+      schedulePeriodicBacktest();                    // 调度下一次
     }, delay);
   }
-  scheduleHourlyBacktest();
+  schedulePeriodicBacktest();
 })();

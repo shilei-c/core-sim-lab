@@ -149,7 +149,7 @@
       <div class="card stat-card">
         <div class="stat-label">行情采集（今日）</div>
         <div id="pullsToday" class="stat-value big">—<span class="unit"> 次</span></div>
-        <div class="stat-foot">云端每小时自动采集并重跑回测</div>
+        <div class="stat-foot">云端每 15 分钟自动采集并重跑回测</div>
       </div>
     </section>
 
@@ -157,7 +157,7 @@
     <section class="section-head">
       <div>
         <h2>策略收益总览</h2>
-        <p class="section-sub">CORE / MMT / MERL / BABY / STX 五币并列 · 同一自由模式信号内核 · 区间收益＝期末金额（价格×持仓数量＋现金）÷ 期初金额 − 1 · 排名按超额收益（区间收益 − 币价涨跌）由高到低 · 每小时自动刷新</p>
+        <p class="section-sub">CORE / MMT / MERL / BABY / STX 五币并列 · 同一自由模式信号内核 · 区间收益＝期末金额（价格×持仓数量＋现金）÷ 期初金额 − 1 · 排名按超额收益（区间收益 − 币价涨跌）由高到低 · 每 15 分钟自动刷新</p>
       </div>
     </section>
     <div class="segmented" id="windowTabs" role="tablist" aria-label="回测区间">
@@ -309,7 +309,7 @@
       <div class="card-head"><h3>数据源说明</h3></div>
       <div class="source-note">
         <p><b>优先接入：</b>页面打开时浏览器会直连欧易 OKX 公共行情 API（CORE-USDT），若您的网络可访问欧易则自动使用欧易真实 K 线重算全部回测，状态栏显示「OKX 欧易直连」。</p>
-        <p><b>自动更新：</b>云端每小时自动采集真实行情并重跑回测（OKX → Binance → Gate.io 自动切换数据源），结果与榜单同步刷新；页面打开时若网络可达欧易，还会直连 OKX 在浏览器内重算一次 CORE。</p>
+        <p><b>自动更新：</b>云端每 15 分钟自动采集真实行情并重跑回测（OKX → Binance → Gate.io 自动切换数据源），结果与榜单同步刷新；页面打开时若网络可达欧易，还会直连 OKX 在浏览器内重算一次 CORE。</p>
       </div>
     </section>
 
@@ -317,7 +317,7 @@
       本页面为教学与演示用途的模拟交易系统，所有资金均为虚拟。行情来自公开数据源，回测结果不代表未来表现，不构成任何投资建议。
     </div>
   </main>
-  <footer class="footer">CORE Sim Lab · 全免费在线运行 · 数据每小时自动刷新</footer>
+  <footer class="footer">CORE Sim Lab · 全免费在线运行 · 数据每 15 分钟自动刷新</footer>
 </div>
 
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
