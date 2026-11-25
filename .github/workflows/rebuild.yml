@@ -26,9 +26,11 @@ jobs:
       - name: Build static site data
         run: node build-static.js
 
-      - name: Notify new CORE trade to WeCom bot
+      - name: Notify new CORE trade to WeChat
         continue-on-error: true   # 推送失败不阻断数据重建与提交
         env:
+          SERVERCHAN_SENDKEY: ${{ secrets.SERVERCHAN_SENDKEY }}
+          PUSHPLUS_TOKEN: ${{ secrets.PUSHPLUS_TOKEN }}
           WECOM_WEBHOOK: ${{ secrets.WECOM_WEBHOOK }}
         run: node notify-trade.js
 
