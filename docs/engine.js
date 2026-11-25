@@ -166,7 +166,6 @@
   function runStrategy(candles, rule) {
     const { signals, reasons, atr: A } = computeSignals(candles);
     let cash = INITIAL_CAPITAL, qty = 0;
-    let priceFactor = 1;     // 逐笔价格复利因子：每轮完整交易按 卖出价/买入均价 累乘，与数量、资金规模无关
     let peak = INITIAL_CAPITAL, maxDD = 0;
     let trades = 0, wins = 0, losses = 0;
     let lastBuyPrice = 0;
@@ -178,13 +177,11 @@
     const equityCurve = [];  // 策略权益曲线（资产）
     const priceCurve = [];   // 币价曲线（每根K线收盘价），供「币的价格曲线」图表使用
 
-    // 权益按"逐笔价格复利"计：已落袋的每轮收益按买卖价差累乘，持仓中的浮动按现价/成本价折算。
-    // 与持仓数量、投入资金规模无关，纯粹反映择时（价格）的正确性。
+    // 账户金额（市值法）：现金 + 持仓数量 × 当前价。现金视作单价 1 的持仓。
+    // 区间收益 = 期末金额 / 期初金额 − 1，其中期初金额 = 初始本金（满仓买入前）。
+    // 数量与价格同时参与，与用户口径「当前价×数量 对比 期初价×数量」一致。
     function equityAt(price) {
-      const realized = priceFactor;                                   // 已平仓轮次的累计复利
-      const floating = (qty > 0 && lastBuyPrice > 0 && price > 0)
-        ? price / lastBuyPrice : 1;                                    // 当前持仓的价格浮动因子
-      return INITIAL_CAPITAL * realized * floating;
+      return cash + qty * price;
     }
 
     function buy(price, ts, fraction, reason) {
@@ -215,12 +212,6 @@
       const execPx = price * (1 - SLIPPAGE);
       const gross = amount * execPx;
       const fee = gross * FEE_RATE;
-      // 逐笔价格复利：本轮收益率 = 卖出价/买入均价 − 1，与卖出数量、资金规模无关。
-      // 部分卖出时按卖出比例计入；全额卖出时整轮收益一次性落袋。
-      if (lastBuyPrice > 0 && execPx > 0) {
-        const legReturn = execPx / lastBuyPrice - 1;
-        priceFactor *= (1 + fraction * legReturn);
-      }
       cash += gross - fee;
       qty -= amount;
       const pnl = (execPx - lastBuyPrice) * amount - fee;
@@ -283,7 +274,7 @@
 
     const first = candles[0] ? candles[0].c : 0;
     const last = candles.length ? candles[candles.length - 1].c : 0;
-    // 区间收益 = 逐笔价格复利：已平仓轮次按买卖价差累乘，未平仓部分按现价/成本浮动折算
+    // 区间收益 = 期末账户金额（现金 + 数量×现价）/ 期初金额 − 1（市值金额法）
     const finalEquity = equityAt(last);
     const days = candles.length > 1 ? (candles[candles.length - 1].t - candles[0].t) / 86400000 : 0;
     const ret = finalEquity / INITIAL_CAPITAL - 1;
