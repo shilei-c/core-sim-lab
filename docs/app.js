@@ -499,7 +499,7 @@
         await loadStatus();
         await loadLiveTickers();
         await tryOkxDirect();
-        toast('已重新载入最新数据（每日 08:00 / 20:00 自动更新）');
+        toast('已重新载入最新数据（每小时自动更新）');
       } else {
         await api('/api/refresh', { method: 'POST' });
         await loadBacktest();
@@ -591,26 +591,21 @@
   setInterval(loadStatus, 60000);
   setInterval(loadLiveTickers, 60000);
 
-  // 每日自动刷新 2 次收益表格（北京时间 08:00 / 20:00，页面打开时生效）
+  // 每小时自动刷新一次收益数据（整点后 5 分钟，给 Actions 留出生成与发布时间，页面打开时生效）
   // 用 UTC getter 读取平移 +8h 后的时间，等价于北京时间，避免本地时区差异
-  function scheduleDailyBacktest() {
-    const HOURS = [8, 20];
+  function scheduleHourlyBacktest() {
     const offset = 8 * 3600 * 1000;
     const bjNow = Date.now() + offset;              // 以 UTC 刻度表示的“北京时间”
     const bj = new Date(bjNow);
-    const year = bj.getUTCFullYear(), mon = bj.getUTCMonth(), day = bj.getUTCDate();
-    let delay = Infinity;
-    for (const h of HOURS) {
-      let target = Date.UTC(year, mon, day, h, 0, 0, 0);
-      if (target <= bjNow) target += 24 * 3600 * 1000;  // 今天该点已过，改为明天
-      delay = Math.min(delay, target - bjNow);
-    }
+    // 下一个整点 + 5 分钟
+    const target = Date.UTC(bj.getUTCFullYear(), bj.getUTCMonth(), bj.getUTCDate(), bj.getUTCHours() + 1, 5, 0, 0);
+    const delay = Math.max(1000, target - bjNow);
     setTimeout(async () => {
-      try { await loadBacktest(); toast('收益数据已按每日定时自动刷新'); } catch (_) {}
-      loadMulti(true);                               // 同步刷新 MMT / MERL 回测
-      loadLiveTickers();                             // 同步刷新 MMT / MERL 实时价格
-      scheduleDailyBacktest();                       // 调度下一次
+      try { await loadBacktest(); toast('收益数据已按每小时定时自动刷新'); } catch (_) {}
+      loadMulti(true);                               // 同步刷新 MMT / MERL / BABY / STX 回测
+      loadLiveTickers();                             // 同步刷新实时价格
+      scheduleHourlyBacktest();                      // 调度下一次
     }, delay);
   }
-  scheduleDailyBacktest();
+  scheduleHourlyBacktest();
 })();
