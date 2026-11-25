@@ -8,6 +8,9 @@
   let multiPollCount = 0;
   let currentWindow = '3m';
   let currentCoin = 'CORE';          // 成交明细当前展示币种
+  let signalReport = null;           // 实时信号数据
+  let signalCoin = 'CORE';           // 实时信号当前展示币种
+  let directCandles = {};            // 浏览器直连拉取的K线缓存 {coin: candles}
   const COLORS = { R1: '#0a84ff' };
   const NAMES = { R1: '自由模式' };
   const COIN_COLORS = { CORE: '#0a84ff', MMT: '#bf5af2', MERL: '#ff9f0a', BABY: '#30d158', STX: '#ff453a' };
@@ -45,7 +48,8 @@
     '/api/status': 'data/status.json',
     '/api/ranking': 'data/ranking.json',
     '/api/multicoin': 'data/multicoin.json',
-    '/api/live-ticker': 'data/live-ticker.json'
+    '/api/live-ticker': 'data/live-ticker.json',
+    '/api/signal': 'data/signal.json'
   };
   async function api(path, opts) {
     let url = path;
@@ -481,6 +485,7 @@
   async function loadLiveTickers() {
     try {
       const d = await api('/api/live-ticker');
+      window._liveTickers = d;
       renderLiveTickers(d);
       if (d.status === 'computing' && livePollCount++ < 20) {
         setTimeout(loadLiveTickers, 3000);   // 首次同步中，轮询至就绪
@@ -499,6 +504,7 @@
         await loadMarket();
         await loadStatus();
         await loadLiveTickers();
+        await loadSignal();
         await tryOkxDirect();
         toast('已重新载入最新数据（每小时自动更新）');
       } else {
@@ -558,6 +564,7 @@
           })
         });
         window._okxDirect = true;
+        window._okxPrice = price;
         renderAll();
         toast('已直连 OKX 欧易，回测已按欧易真实行情重算');
         return true;
@@ -565,6 +572,193 @@
     }
     return false;
   }
+
+  /* ============ 实时交易信号 ============ */
+  function fmtCountdown(sec) {
+    sec = Math.max(0, Math.round(sec));
+    const h = Math.floor(sec / 3600), m = Math.floor((sec % 3600) / 60), s = sec % 60;
+    return (h > 0 ? String(h).padStart(2, '0') + ':' : '') + String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+  }
+  function priceText(v) {
+    if (!(v > 0)) return '—';
+    return v < 1 ? Number(v).toFixed(6) : Number(v).toFixed(4);
+  }
+  function actionClass(a) {
+    return 'act-' + String(a || 'WAIT').toLowerCase().replace(/_/g, '_');
+  }
+
+  function currentSignal() {
+    if (!signalReport || !signalReport.coins) return null;
+    return signalReport.coins[signalCoin] || null;
+  }
+
+  function renderSignal() {
+    const box = $('signalAction');
+    if (!box) return;
+    document.querySelectorAll('#signalCoinSwitch .coin-tab').forEach(b => {
+      b.classList.toggle('active', b.dataset.coin === signalCoin);
+    });
+    const s = currentSignal();
+    if (!s || s.error) {
+      box.textContent = '—'; box.className = 'signal-action act-wait';
+      $('signalReason').textContent = s && s.error ? ('信号计算失败：' + s.error) : '信号数据加载中…';
+      return;
+    }
+    const cur = s.current || {};
+    box.textContent = cur.label || '—';
+    box.className = 'signal-action ' + actionClass(cur.action);
+    $('signalReason').textContent = cur.reason || '—';
+    $('signalPrice').textContent = priceText(s.price);
+    $('signalTime').textContent = (cur.time ? '动作时间 ' + cur.time : '');
+
+    const urgent = $('signalUrgent');
+    if (urgent) urgent.hidden = !cur.urgent;
+    const wc = $('signalWillChange');
+    if (wc) wc.hidden = !cur.willChange;
+
+    // 倒计时实时刷新
+    updateCountdown();
+
+    const risk = s.risk || {};
+    $('sigPosition').textContent = risk.holding ? '持仓中' : '空仓';
+    $('sigEntry').textContent = risk.entry ? priceText(risk.entry) : '—';
+    $('sigAtrStop').textContent = risk.atrStop ? priceText(risk.atrStop) : '—';
+    $('sigTrailStop').textContent = risk.trailingStop ? priceText(risk.trailingStop) : '—';
+    const dist = $('sigDistance');
+    if (risk.distancePct != null) {
+      dist.textContent = (risk.distancePct > 0 ? '+' : '') + Number(risk.distancePct).toFixed(2) + '%';
+      dist.className = 'sig-v ' + signCls(risk.distancePct);
+    } else { dist.textContent = '—'; dist.className = 'sig-v'; }
+    $('sigCooldown').textContent = risk.cooldownLeft > 0 ? (risk.cooldownLeft + ' 根（约' + (risk.cooldownLeft * 4 / 24).toFixed(1) + '天）') : '—';
+    const ind = s.indicators || {};
+    $('sigEma').textContent = (ind.fast && ind.slow) ? (priceText(ind.fast) + ' / ' + priceText(ind.slow)) : '—';
+    $('sigRsi').textContent = (ind.rsi != null) ? (Number(ind.rsi).toFixed(1) + ' · ' + (ind.trend || '—')) : '—';
+
+    const cf = s.confirmed || {};
+    $('signalConfirmed').textContent = (cf.label || '—') + (cf.reason ? '（' + cf.reason + '）' : '') + (cf.time ? ' @ ' + cf.time : '');
+
+    const gen = s.generatedAt ? new Date(s.generatedAt) : null;
+    const src = s.priceSource ? ' · ' + s.priceSource : '';
+    $('signalMeta').textContent = (s.sourceName || '实时行情') + src + (gen ? ' · ' + p2(gen.getHours()) + ':' + p2(gen.getMinutes()) + ' 更新' : '');
+  }
+  function p2(n) { return String(n).padStart(2, '0'); }
+  function updateCountdown() {
+    const s = currentSignal();
+    const el = $('signalCountdown');
+    if (!el || !s || s.error || !s.barCloseAt) return;
+    const left = Math.max(0, Math.round((s.barCloseAt - Date.now()) / 1000));
+    el.textContent = fmtCountdown(left);
+    $('signalBarState').textContent = s.inProgress ? '当前K线进行中 · 收盘后信号才稳定' : '等待下一根K线开始';
+  }
+
+  async function loadSignal() {
+    try {
+      const d = await api('/api/signal');
+      signalReport = d;
+      renderSignal();
+    } catch (_) {}
+  }
+
+  /** 浏览器直连交易所拉取某币最近 400 根 4H K线（多源降级），用于实时重算信号 */
+  async function fetchDirectCandles(symbol) {
+    const hosts = ['https://www.okx.com', 'https://aws.okx.com'];
+    const apis = [
+      {
+        key: 'okx', hosts,
+        build: (host, after) => host + '/api/v5/market/history-candles?instId=' + symbol + '-USDT&bar=4H&limit=100' + (after ? '&after=' + after : ''),
+        parse: j => (j && j.code === '0' && Array.isArray(j.data)) ? j.data.map(r => ({ t: +r[0], o: +r[1], h: +r[2], l: +r[3], c: +r[4], v: +r[5] })) : null,
+        next: j => (j.data && j.data.length) ? j.data[j.data.length - 1][0] : null
+      },
+      {
+        key: 'binance', hosts: ['https://api.binance.com', 'https://data-api.binance.vision'],
+        build: (host, end) => host + '/api/v3/klines?symbol=' + symbol + 'USDT&interval=4h&limit=500' + (end ? '&endTime=' + (end - 1) : ''),
+        parse: j => Array.isArray(j) ? j.map(r => ({ t: +r[0], o: +r[1], h: +r[2], l: +r[3], c: +r[4], v: +r[5] })) : null,
+        next: () => null
+      },
+      {
+        key: 'gate', hosts: ['https://api.gateio.ws'],
+        build: (host) => host + '/api/v4/spot/candlesticks?currency_pair=' + symbol + '_USDT&interval=4h&limit=500',
+        parse: j => Array.isArray(j) ? j.map(r => ({ t: +r[0] * 1000, o: +r[5], h: +r[3], l: +r[4], c: +r[2], v: +r[6] })) : null,
+        next: () => null
+      }
+    ];
+    for (const apiDef of apis) {
+      for (const host of apiDef.hosts) {
+        try {
+          const ctrl = new AbortController();
+          const timer = setTimeout(() => ctrl.abort(), 7000);
+          let all = [], cursor = null;
+          for (let page = 0; page < 5; page++) {
+            const url = apiDef.build(host, cursor);
+            const r = await fetch(url, { signal: ctrl.signal, cache: 'no-store' });
+            if (!r.ok) throw new Error('HTTP ' + r.status);
+            const j = await r.json();
+            const batch = apiDef.parse(j);
+            if (!batch || !batch.length) break;
+            all = all.concat(batch);
+            if (apiDef.key !== 'okx') break;
+            cursor = apiDef.next(j);
+            if (!cursor || all.length >= 400) break;
+          }
+          clearTimeout(timer);
+          const map = new Map();
+          all.forEach(c => { if (c.t > 0 && c.c > 0) map.set(c.t, c); });
+          const candles = Array.from(map.values()).sort((a, b) => a.t - b.t);
+          if (candles.length >= 40) return { candles, source: apiDef.key };
+        } catch (_) { /* 该节点不可达，继续 */ }
+      }
+    }
+    return null;
+  }
+
+  /** 浏览器直连重算：拉最新K线+实时价，用同一引擎算信号，让信号不依赖每小时静态更新 */
+  async function refreshSignalDirect() {
+    const E = window.CoreEngine;
+    if (!E || !E.computeLiveSignal) return false;
+    let touched = 0;
+    for (const sym of COINS) {
+      try {
+        const got = await fetchDirectCandles(sym);
+        if (!got) continue;
+        directCandles[sym] = got.candles;
+        // 实时价：优先用已有的 ticker 数据
+        let price = 0;
+        if (sym === 'CORE') {
+          price = (window._okxPrice && window._okxPrice > 0) ? window._okxPrice : 0;
+        } else {
+          const lt = window._liveTickers && window._liveTickers.coins && window._liveTickers.coins[sym];
+          if (lt && lt.price > 0) price = lt.price;
+        }
+        if (!price) price = got.candles[got.candles.length - 1].c;
+        const sig = E.computeLiveSignal(got.candles, price);
+        if (sig && signalReport && signalReport.coins) {
+          sig.symbol = sym;
+          sig.sourceName = '浏览器直连 · ' + got.source.toUpperCase();
+          sig.priceSource = '实时价覆盖当前K线';
+          signalReport.coins[sym] = sig;
+          touched++;
+        }
+      } catch (_) { /* 单币失败不影响其他 */ }
+    }
+    if (touched) {
+      signalReport = Object.assign({}, signalReport, { generatedAt: Date.now(), status: 'ready' });
+      renderSignal();
+      toast('实时信号已按交易所最新K线重算（' + touched + '/5 币）');
+    }
+    return touched > 0;
+  }
+
+  const sigSwitch = $('signalCoinSwitch');
+  if (sigSwitch) {
+    sigSwitch.addEventListener('click', e => {
+      const b = e.target.closest('.coin-tab'); if (!b) return;
+      signalCoin = b.dataset.coin;
+      renderSignal();
+    });
+  }
+  setInterval(updateCountdown, 1000);
+  setInterval(loadSignal, 60000);              // 静态基线每分钟重载
+  setInterval(refreshSignalDirect, 60000);     // 浏览器直连每60秒重算
 
   $('windowTabs').addEventListener('click', e => {
     const b = e.target.closest('.seg'); if (!b) return;
@@ -589,6 +783,7 @@
   loadMarket();
   loadStatus();
   loadLiveTickers();
+  loadSignal();
   setInterval(loadStatus, 60000);
   setInterval(loadLiveTickers, 60000);
 
@@ -605,6 +800,7 @@
       try { await loadBacktest(); toast('收益数据已按每小时定时自动刷新'); } catch (_) {}
       loadMulti(true);                               // 同步刷新 MMT / MERL / BABY / STX 回测
       loadLiveTickers();                             // 同步刷新实时价格
+      loadSignal();                                  // 同步刷新实时交易信号
       scheduleHourlyBacktest();                      // 调度下一次
     }, delay);
   }

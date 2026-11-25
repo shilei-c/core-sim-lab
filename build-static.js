@@ -16,6 +16,7 @@ const data = require('./lib/data');
 const ranking = require('./lib/ranking');
 const multicoin = require('./lib/multicoin');
 const liveTicker = require('./lib/live-ticker');
+const signal = require('./lib/signal');
 
 const ROOT = __dirname;
 const DOCS = path.join(ROOT, 'docs');
@@ -97,6 +98,17 @@ async function buildLiveTicker() {
   }
 }
 
+async function buildSignal() {
+  try {
+    const s = await signal.compute(true);
+    if (s && s.coins && Object.keys(s.coins).length) writeJson('signal.json', s);
+    else cacheFallback('signal-cache.json', 'signal.json');
+  } catch (e) {
+    console.error('[build] signal failed:', e.message);
+    cacheFallback('signal-cache.json', 'signal.json');
+  }
+}
+
 function copyAssets() {
   ensureDir(DOCS);
   copyFile(path.join(PUBLIC, 'styles.css'), path.join(DOCS, 'styles.css'));
@@ -120,6 +132,7 @@ function copyAssets() {
   await buildRanking();
   await buildLiveTicker();   // 先刷新实时价，供多币回测覆盖最后一根K线使用
   await buildMulticoin();
+  await buildSignal();       // 实时交易信号（五币），依赖实时价与K线
   console.log('[build] done -> ' + DOCS);
   process.exit(0);
 })().catch(e => { console.error('[build] FATAL', e); process.exit(1); });

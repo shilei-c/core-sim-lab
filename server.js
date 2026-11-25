@@ -7,6 +7,7 @@ const data = require('./lib/data');
 const ranking = require('./lib/ranking');
 const multicoin = require('./lib/multicoin');
 const liveTicker = require('./lib/live-ticker');
+const signal = require('./lib/signal');
 
 const PORT = process.env.PORT || 3000;
 const PUBLIC = path.join(__dirname, 'public');
@@ -121,6 +122,12 @@ const server = http.createServer(async (req, res) => {
       return json(res, 200, liveTicker.get(force));
     }
 
+    // 实时交易信号（五币）：当前动作、持仓与风控线、K线收盘倒计时
+    if (pathname === '/api/signal') {
+      const force = urlObj.searchParams.get('refresh') === '1';
+      return json(res, 200, signal.get(force));
+    }
+
     if (pathname === '/api/engine' || pathname === '/engine.js') {
       return serveFile(res, path.join(__dirname, 'lib', 'engine.js'));
     }
@@ -140,6 +147,7 @@ data.init();
 ranking.init();
 multicoin.init();
 liveTicker.init();
+signal.init();
 server.listen(PORT, '0.0.0.0', () => {
   console.log('CORE Simulator running on port ' + PORT);
 });

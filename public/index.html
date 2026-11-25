@@ -85,6 +85,60 @@
       </div>
     </section>
 
+    <!-- 实时交易信号 -->
+    <section class="section-head signal-head">
+      <div>
+        <h2>实时交易信号 <span class="live-pulse" id="signalPulse"></span></h2>
+        <p class="section-sub">按同一套激进版规则实时推演 · 区分「已收盘确认」与「当前K线预览」· 每 60 秒自动刷新</p>
+      </div>
+    </section>
+    <section class="card signal-panel">
+      <div class="signal-toolbar">
+        <div class="coin-switch signal-switch" id="signalCoinSwitch" role="tablist" aria-label="实时信号币种">
+          <button class="coin-tab active" data-coin="CORE" role="tab">CORE</button>
+          <button class="coin-tab" data-coin="MMT" role="tab">MMT</button>
+          <button class="coin-tab" data-coin="MERL" role="tab">MERL</button>
+          <button class="coin-tab" data-coin="BABY" role="tab">BABY</button>
+          <button class="coin-tab" data-coin="STX" role="tab">STX</button>
+        </div>
+        <div id="signalMeta" class="muted-note">加载中…</div>
+      </div>
+      <div class="signal-body">
+        <div class="signal-main">
+          <div class="signal-action-row">
+            <span id="signalAction" class="signal-action act-wait">—</span>
+            <span id="signalUrgent" class="signal-urgent" hidden>风控触发</span>
+            <span id="signalWillChange" class="signal-change" hidden>收盘前可能变化</span>
+          </div>
+          <div id="signalReason" class="signal-reason">正在计算当前信号…</div>
+          <div class="signal-ref">
+            <span>参考价 <b id="signalPrice">—</b></span>
+            <span id="signalTime">—</span>
+          </div>
+        </div>
+        <div class="signal-countdown">
+          <div class="cd-label">距本根 4H K 线收盘</div>
+          <div id="signalCountdown" class="cd-value">—</div>
+          <div id="signalBarState" class="cd-foot">—</div>
+        </div>
+      </div>
+      <div class="signal-grid">
+        <div class="sig-cell"><span class="sig-k">持仓状态</span><span id="sigPosition" class="sig-v">—</span></div>
+        <div class="sig-cell"><span class="sig-k">持仓成本</span><span id="sigEntry" class="sig-v">—</span></div>
+        <div class="sig-cell"><span class="sig-k">ATR 止损</span><span id="sigAtrStop" class="sig-v">—</span></div>
+        <div class="sig-cell"><span class="sig-k">移动止损</span><span id="sigTrailStop" class="sig-v">—</span></div>
+        <div class="sig-cell"><span class="sig-k">距止损</span><span id="sigDistance" class="sig-v">—</span></div>
+        <div class="sig-cell"><span class="sig-k">冷却剩余</span><span id="sigCooldown" class="sig-v">—</span></div>
+        <div class="sig-cell"><span class="sig-k">EMA8 / 21</span><span id="sigEma" class="sig-v">—</span></div>
+        <div class="sig-cell"><span class="sig-k">RSI / 趋势</span><span id="sigRsi" class="sig-v">—</span></div>
+      </div>
+      <div class="signal-confirmed">
+        <span class="sc-label">上一根收盘确认</span>
+        <span id="signalConfirmed" class="sc-value">—</span>
+      </div>
+      <div class="signal-foot">信号为策略虚拟推演，非实盘交易指令。当前进行中 K 线尚未收盘，其收盘价变化可能导致信号反转；"已收盘确认"才是稳定信号。据此操作风险自负，不构成投资建议。</div>
+    </section>
+
     <!-- 概览 -->
     <section class="overview">
       <div class="card stat-card">

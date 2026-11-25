@@ -177,7 +177,50 @@ button{font-family:inherit}
 .toast{position:fixed;left:50%;bottom:32px;transform:translate(-50%,20px);background:rgba(29,29,31,.94);color:#fff;padding:11px 20px;border-radius:100px;font-size:13px;opacity:0;pointer-events:none;transition:.25s;z-index:50;box-shadow:0 8px 30px rgba(0,0,0,.2)}
 .toast.show{opacity:1;transform:translate(-50%,0)}
 
+/* ===== 实时交易信号面板 ===== */
+.signal-head h2{display:flex;align-items:center;gap:8px}
+.live-pulse{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 0 0 rgba(48,209,88,.5);animation:pulse 2s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(48,209,88,.5)}70%{box-shadow:0 0 0 8px rgba(48,209,88,0)}100%{box-shadow:0 0 0 0 rgba(48,209,88,0)}}
+.signal-panel{padding:0 0 16px;margin-bottom:6px;overflow:hidden}
+.signal-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 20px 4px;flex-wrap:wrap}
+.signal-switch{margin:0}
+.signal-body{display:grid;grid-template-columns:1fr 190px;gap:16px;padding:14px 20px 16px;align-items:center}
+.signal-main{min-width:0}
+.signal-action-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.signal-action{display:inline-block;font-size:30px;font-weight:800;letter-spacing:-1px;line-height:1.1;padding:4px 16px 6px;border-radius:12px}
+.act-buy{color:#fff;background:linear-gradient(145deg,#ff5c52,#e0362b)}   /* 买入=红 */
+.act-sell{color:#fff;background:linear-gradient(145deg,#34d26b,#1a9e4c)}  /* 卖出=绿 */
+.act-add{color:#fff;background:linear-gradient(145deg,#ff9f0a,#e07d00)}
+.act-hold{color:var(--blue);background:rgba(10,132,255,.12)}
+.act-wait,.act-wait_cooldown{color:#6e6e73;background:#efeff2}
+.signal-urgent{font-size:11px;font-weight:700;color:#fff;background:var(--red);border-radius:6px;padding:3px 8px;animation:pulse 1.4s infinite}
+.signal-change{font-size:11px;font-weight:600;color:#a2780a;background:rgba(255,159,10,.14);border-radius:6px;padding:3px 8px}
+.signal-reason{font-size:13px;color:#3a3a3c;margin-top:10px;font-weight:600;line-height:1.5}
+.signal-ref{display:flex;gap:16px;margin-top:8px;font-size:11px;color:var(--sub)}
+.signal-ref b{font-variant-numeric:tabular-nums;color:var(--ink);font-size:13px}
+.signal-countdown{background:linear-gradient(145deg,#f7f7fa,#eeeef2);border-radius:14px;padding:14px 16px;text-align:center}
+.cd-label{font-size:11px;color:var(--sub);font-weight:600}
+.cd-value{font-size:26px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.5px;margin:4px 0 2px}
+.cd-foot{font-size:10px;color:var(--sub)}
+.signal-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);margin:0 20px;border-radius:12px;overflow:hidden}
+.sig-cell{background:#fbfbfd;padding:11px 12px;display:flex;flex-direction:column;gap:3px;min-width:0}
+.sig-k{font-size:10px;color:var(--sub);font-weight:600;white-space:nowrap}
+.sig-v{font-size:13px;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sig-v.pos{color:var(--red)}.sig-v.neg{color:var(--green)}
+.signal-confirmed{display:flex;align-items:center;gap:10px;margin:14px 20px 0;padding:10px 14px;background:rgba(10,132,255,.06);border-radius:10px;flex-wrap:wrap}
+.sc-label{font-size:11px;color:var(--sub);font-weight:600;white-space:nowrap}
+.sc-value{font-size:12px;color:#3a3a3c;font-weight:600}
+.signal-foot{margin:14px 20px 0;font-size:11px;color:var(--sub);line-height:1.6}
 @media(max-width:800px){
+  .signal-body{grid-template-columns:1fr;gap:12px;padding:12px 16px 14px}
+  .signal-countdown{display:grid;grid-template-columns:1fr auto;align-items:center;text-align:left;padding:10px 14px}
+  .cd-value{font-size:20px;margin:0}
+  .cd-foot{grid-column:1/-1}
+  .signal-grid{grid-template-columns:repeat(2,1fr);margin:0 16px}
+  .signal-action{font-size:26px}
+  .signal-toolbar{padding:14px 16px 4px}
+  .signal-confirmed,.signal-foot{margin-left:16px;margin-right:16px}
+}
   .overview{grid-template-columns:1fr 1fr}
   .section-head h2{font-size:18px}
   .ticker-card{display:flex;overflow-x:auto;-webkit-overflow-scrolling:touch}
