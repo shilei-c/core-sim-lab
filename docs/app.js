@@ -78,7 +78,8 @@
     ch.textContent = (s.change24h > 0 ? '+' : '') + Number(s.change24h || 0).toFixed(2) + '% (24h)';
     ch.className = 'ticker-change ' + signCls(s.change24h);
     $('pullsToday').innerHTML = (s.pullsToday ?? 0) + '<span class="unit"> 次</span>';
-    $('reqPulls').textContent = s.requiredPullsPerDay || 5;
+    const reqPulls = $('reqPulls');   // 该展示项已下线，元素可能不存在；保留兼容避免空指针
+    if (reqPulls) reqPulls.textContent = s.requiredPullsPerDay || 5;
 
     const log = $('pullLog');
     const pulls = s.recentPulls || [];
