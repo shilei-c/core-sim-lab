@@ -115,11 +115,13 @@ function copyAssets() {
   copyFile(path.join(PUBLIC, 'app.js'), path.join(DOCS, 'app.js'));
   copyFile(path.join(ROOT, 'lib', 'engine.js'), path.join(DOCS, 'engine.js'));
   let html = fs.readFileSync(path.join(PUBLIC, 'index.html'), 'utf8');
-  html = html.replace('href="/styles.css"', 'href="styles.css"')
-             .replace('src="/engine.js"', 'src="engine.js"')
-             .replace('src="/app.js"', 'src="app.js"');
-  html = html.replace('<script src="engine.js"></script>',
-    '<script>window.STATIC_SITE=true;</script>\n<script src="engine.js"></script>');
+  // 把以 / 开头的静态资源引用改成相对路径（保留 ?v= 版本号防缓存）
+  html = html.replace(/href="\/styles\.css(\?[^"]*)?"/g, 'href="styles.css$1"')
+             .replace(/src="\/engine\.js(\?[^"]*)?"/g, 'src="engine.js$1"')
+             .replace(/src="\/app\.js(\?[^"]*)?"/g, 'src="app.js$1"');
+  // 在 engine.js 脚本前注入 STATIC_SITE 标记（兼容带版本号）
+  html = html.replace(/<script src="engine\.js(\?[^"]*)?"><\/script>/,
+    (m, q) => '<script>window.STATIC_SITE=true;</script>\n<script src="engine.js' + (q || '') + '"></script>');
   fs.writeFileSync(path.join(DOCS, 'index.html'), html);
   fs.writeFileSync(path.join(DOCS, '.nojekyll'), '');   // GitHub Pages 禁用 Jekyll 处理
   console.log('[build] copied static assets -> docs/');
