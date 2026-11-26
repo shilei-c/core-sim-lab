@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>OKX 信号策略操作手册 · CORE 攻守兼备版 EMA5/34</title>
+<title>OKX 信号策略操作手册 · CORE 攻守兼备版 EMA5/55</title>
 <style>
   :root{
     --bg:#f5f7fa; --card:#ffffff; --ink:#243447; --muted:#6b7a90;
@@ -59,7 +59,7 @@
 <body>
 <div class="wrap">
   <h1>把 CORE 攻守兼备版策略接入 OKX 自动交易</h1>
-  <div class="sub">EMA5/34 金叉 · 不加仓 · 0.8ATR 止损 · 40% 宽移动止损 · 无冷却 · 操作手册</div>
+  <div class="sub">EMA5/55 金叉 · 不加仓 · 2.2ATR 止损 · 12% 移动止损 · 冷却16根4H · 操作手册</div>
 
   <div class="card tldr">
     <h2>先看结论</h2>
@@ -92,7 +92,7 @@
     <div class="codebox">
       <button class="copy" data-target="pine">复制代码</button>
       <pre id="pine">//@version=5
-strategy("CORE 攻守兼备版 EMA5/34 + ATR/移动止损", overlay=true,
+strategy("CORE 攻守兼备版 EMA5/55 + ATR/移动止损", overlay=true,
      initial_capital=10000,
      default_qty_type=strategy.percent_of_equity,
      default_qty_value=98,
@@ -104,12 +104,12 @@ strategy("CORE 攻守兼备版 EMA5/34 + ATR/移动止损", overlay=true,
 
 // ---------- 参数（对应网站回测）----------
 fastLen     = input.int(5,    "快线 EMA",   minval=1)
-slowLen     = input.int(34,   "慢线 EMA",   minval=1)
+slowLen     = input.int(55,   "慢线 EMA",   minval=1)
 rsiLen      = input.int(14,   "RSI 周期",   minval=1)
 atrLen      = input.int(14,   "ATR 周期",   minval=1)
-atrMult     = input.float(0.8,  "ATR 止损倍数",  minval=0.1, step=0.1)
-trailPct    = input.float(40.0, "移动止损回撤%", minval=0.1, step=0.5) / 100
-cooldownB   = input.int(0,    "冷却 K 线数", minval=0)
+atrMult     = input.float(2.2,  "ATR 止损倍数",  minval=0.1, step=0.1)
+trailPct    = input.float(12.0, "移动止损回撤%", minval=0.1, step=0.5) / 100
+cooldownB   = input.int(16,   "冷却 K 线数", minval=0)
 rsiEntryMax = input.float(82.0, "入场 RSI 上限", minval=1, maxval=100)
 rsiExitMin  = input.float(84.0, "离场 RSI 阈值", minval=1, maxval=100)
 
@@ -140,8 +140,8 @@ if strategy.position_size[1] &gt; 0 and not inPos
     peak := 0.0
     adds := 0
 
-<span class="cmt">// 入场：金叉 + RSI&lt;82 + 空仓 → 满仓(98%)，不加仓</span>
-if golden and rsiV &lt; rsiEntryMax and not inPos
+<span class="cmt">// 入场：金叉 + RSI&lt;82 + 空仓 + 冷却结束 → 满仓(98%)，不加仓</span>
+if golden and rsiV &lt; rsiEntryMax and not inPos and cooldown &lt;= 0
     strategy.entry("Long", strategy.long)
     peak := close
     adds := 0
@@ -150,7 +150,7 @@ if golden and rsiV &lt; rsiEntryMax and not inPos
 if (death or rsiV &gt; rsiExitMin) and inPos
     strategy.close("Long")
 
-<span class="cmt">// 风控：0.8ATR 止损 与 40% 移动止损，取更近者挂单</span>
+<span class="cmt">// 风控：2.2ATR 止损 与 12% 移动止损，取更近者挂单</span>
 if inPos and avgPx &gt; 0
     s1 = avgPx - atrMult * atrV
     s2 = peak &gt; 0 ? peak * (1 - trailPct) : s1
@@ -162,17 +162,17 @@ if cooldown &gt; 0
 
 <span class="cmt">// ---------- 绘图 ----------</span>
 plot(emaF, "EMA5",  color=color.orange, linewidth=2)
-plot(emaS, "EMA34", color=color.blue,   linewidth=2)
+plot(emaS, "EMA55", color=color.blue,   linewidth=2)
 plotshape(golden, "金叉买", shape.triangleup,   location.belowbar, color=color.green, size=size.tiny)
 plotshape(death,  "死叉卖", shape.triangledown, location.abovebar, color=color.red,   size=size.tiny)
       </pre>
     </div>
-    <p class="kv">代码严格沿用网站引擎参数：EMA5/34、RSI14、ATR14、入场 RSI&lt;82、离场 RSI&gt;84、0.8×ATR 止损、最高价回撤 40%（宽移动止损让利润奔跑）、满仓 98%、不加仓、卖出无冷却。滑点按 3 tick（约 0.03%）近似，手续费按 0.08%。这套参数在 CORE 上涨段捕获约 54% 涨幅，同时在下跌年仍取得正收益，兼顾进攻与防守。</p>
+    <p class="kv">代码严格沿用网站引擎参数：EMA5/55、RSI14、ATR14、入场 RSI&lt;82、离场 RSI&gt;84、2.2×ATR 止损、最高价回撤 12% 移动止损、满仓 98%、不加仓、卖出冷却 16 根 4H。滑点按 3 tick（约 0.03%）近似，手续费按 0.08%。这套参数由 CORE/MMT/MERL/BABY/STX/HYPE 六币联合寻优得出：CORE 全年收益与稳定性兼顾，MMT/MERL/BABY 表现同步改善。</p>
   </div>
 
   <h2>第二步：OKX 端创建信号</h2>
   <div class="step"><div class="num">1</div><div class="stepbody"><b>进入信号策略</b><br>登录 OKX → 顶部「交易」→「策略交易」→「创建策略」→ 选「信号策略」→ 创建。<br><span class="kv">想先零风险测试：切到「模拟交易 Demo Trading」，里面同样有策略交易 → 信号策略，Webhook 地址与实盘不同，别混用。</span></div></div>
-  <div class="step"><div class="num">2</div><div class="stepbody"><b>新增自定义信号</b><br>点「新增自定义信号」→ 填信号名称（如 CORE-EMA5-34）和简介 →「创建信号」。</div></div>
+  <div class="step"><div class="num">2</div><div class="stepbody"><b>新增自定义信号</b><br>点「新增自定义信号」→ 填信号名称（如 CORE-EMA5-55）和简介 →「创建信号」。</div></div>
   <div class="step"><div class="num">3</div><div class="stepbody"><b>复制两个关键值</b><br>系统会生成 <b>Webhook URL</b>（实盘通常是 <code class="inline">https://www.okx.com/algo/signal/trigger</code>，模拟盘是 <code class="inline">https://www.okx.com/pap/algo/signal/trigger</code>）和 <b>signalToken</b>。这两个填进 TradingView 警报，token 不要公开。</div></div>
   <div class="step"><div class="num">4</div><div class="stepbody"><b>选消息格式</b><br>OKX 提供「TradingView 策略格式」和「通用格式」。上面代码用了 <code class="inline">strategy.entry()</code>，选前者，直接复制它给出的 JSON 模板即可（占位符会自动替换）。模板长这样，把 signalToken 换成你的：</div></div>
   <div class="codebox">
@@ -213,7 +213,7 @@ plotshape(death,  "死叉卖", shape.triangledown, location.abovebar, color=colo
   <div class="card note">
     <table>
       <tr><th>问题</th><th>说明</th></tr>
-      <tr><td>只支持永续合约</td><td>OKX 官方 FAQ 明确：Signal Bot 目前不支持现货、杠杆理财和交割合约。五币里若某币没有永续合约，就无法用这条路。</td></tr>
+      <tr><td>只支持永续合约</td><td>OKX 官方 FAQ 明确：Signal Bot 目前不支持现货、杠杆理财和交割合约。六币里若某币没有永续合约，就无法用这条路。</td></tr>
       <tr><td>Webhook 要付费</td><td>TradingView 免费版不能发 Webhook，需 Essential 及以上（约 $12.95/月起，按年付）。OKX 与 TradingView 有合作，达标交易量可能获赠 Plus 套餐。</td></tr>
       <tr><td>一信号一机器人</td><td>每个信号只能绑定一个机器人；一个机器人可加多个交易对。不同币共用一套参数，无法逐币分别优化。</td></tr>
       <tr><td>止损非逐笔实时</td><td>Pine 的止损依赖 K 线收盘或实时 bar 刷新，可能与交易所逐笔挂单的触发价、时点不同；剧烈行情下差异会被放大。</td></tr>
@@ -223,7 +223,7 @@ plotshape(death,  "死叉卖", shape.triangledown, location.abovebar, color=colo
 
   <h2>更省事的替代方案</h2>
   <div class="card">
-    <p>如果只想按这套规则<b>手动</b>操作、不想碰合约和付费订阅：直接用你网站顶部的<b>实时信号面板</b>——它已经把同一套规则推进到当前，给出五币"买/卖/持有/观望"、持仓成本、ATR 止损位、移动止损位、距止损百分比和 4H 收盘倒计时。</p>
+    <p>如果只想按这套规则<b>手动</b>操作、不想碰合约和付费订阅：直接用你网站顶部的<b>实时信号面板</b>——它已经把同一套规则推进到当前，给出六币"买/卖/持有/观望"、持仓成本、ATR 止损位、移动止损位、距止损百分比和 4H 收盘倒计时。</p>
     <p>看点亮的<b>「已收盘确认」</b>信号，在 OKX <b>现货</b>手动下单，止损位照面板数字设。这样和回测口径一致（现货、无杠杆），也没有强平风险，代价是要自己下单、盯止损。</p>
   </div>
 

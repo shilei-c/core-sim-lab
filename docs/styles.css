@@ -91,7 +91,7 @@ button{font-family:inherit}
 .rank-pill.p2{background:linear-gradient(145deg,#d8d8dc,#9a9aa0);color:#fff}
 .rank-pill.p3{background:linear-gradient(145deg,#d4a373,#a4763f);color:#fff}
 
-/* 五币综合积分榜 */
+/* 六币综合积分榜 */
 .score-card{margin-top:16px}
 .score-table{min-width:720px}
 .score-table .score-cell{white-space:nowrap}
@@ -291,7 +291,7 @@ button{font-family:inherit}
   .market-table .m-sym{font-size:10px}
   .market-table .m-sub{font-size:8px}
   .market-progress{padding:12px 10px 2px}
-  /* 五币综合积分榜：手机端紧凑布局 */
+  /* 六币综合积分榜：手机端紧凑布局 */
   .score-table{min-width:0;font-size:10px}
   .score-table th{padding:8px 3px;font-size:9px}
   .score-table td{padding:9px 3px}

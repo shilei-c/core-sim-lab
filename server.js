@@ -122,7 +122,7 @@ const server = http.createServer(async (req, res) => {
       return json(res, 200, liveTicker.get(force));
     }
 
-    // 实时交易信号（五币）：当前动作、持仓与风控线、K线收盘倒计时
+    // 实时交易信号（六币）：当前动作、持仓与风控线、K线收盘倒计时
     if (pathname === '/api/signal') {
       const force = urlObj.searchParams.get('refresh') === '1';
       return json(res, 200, signal.get(force));

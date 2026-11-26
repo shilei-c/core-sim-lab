@@ -13,6 +13,8 @@ _*.js
 _*.py
 data/core-bull-*.json
 data/core-uplegs.json
+data/sixcoin-*.json
+data/sixcoin-candles/
 data/gain-candles/
 data/gain-extra.json
 data/gain-scan.json
