@@ -20,4 +20,10 @@ data/gain-extra.json
 data/gain-scan.json
 data/hype-core-compare.json
 data/strategy-search-*.json
+data/candles-2023/
+data/search-2023*.json
 微信成交提醒配置.md
+
+# 本地手动推送工具（含凭据复用逻辑，不上传）
+push-ghproxy.js
+推送新版-六币HYPE.bat
