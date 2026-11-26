@@ -92,7 +92,7 @@
     <section class="section-head signal-head">
       <div>
         <h2>实时交易信号 <span class="live-pulse" id="signalPulse"></span></h2>
-        <p class="section-sub">按同一套激进版规则实时推演 · 区分「已收盘确认」与「当前K线预览」· 每 60 秒自动刷新</p>
+        <p class="section-sub">按同一套攻守兼备版规则实时推演 · 区分「已收盘确认」与「当前K线预览」· 每 60 秒自动刷新</p>
       </div>
     </section>
     <section class="card signal-panel">
@@ -132,7 +132,7 @@
         <div class="sig-cell"><span class="sig-k">移动止损</span><span id="sigTrailStop" class="sig-v">—</span></div>
         <div class="sig-cell"><span class="sig-k">距止损</span><span id="sigDistance" class="sig-v">—</span></div>
         <div class="sig-cell"><span class="sig-k">冷却剩余</span><span id="sigCooldown" class="sig-v">—</span></div>
-        <div class="sig-cell"><span class="sig-k">EMA8 / 21</span><span id="sigEma" class="sig-v">—</span></div>
+        <div class="sig-cell"><span class="sig-k">EMA5 / 34</span><span id="sigEma" class="sig-v">—</span></div>
         <div class="sig-cell"><span class="sig-k">RSI / 趋势</span><span id="sigRsi" class="sig-v">—</span></div>
       </div>
       <div class="signal-confirmed">
@@ -223,12 +223,12 @@
     <section class="section-head">
       <div>
         <h2>买入时点参考</h2>
-        <p class="section-sub">激进版策略内核说明 · 逐笔成交见下方明细栏目</p>
+        <p class="section-sub">攻守兼备版策略内核说明 · 逐笔成交见下方明细栏目</p>
       </div>
     </section>
     <section class="card signals-card">
       <div class="strategy-banner">
-        <span class="strategy-tag">激进版策略</span>
+        <span class="strategy-tag">攻守兼备策略</span>
         <span id="strategyNote" class="strategy-note">—</span>
       </div>
       <div id="signalList" class="signal-list">加载中…</div>
@@ -293,7 +293,7 @@
 
     <!-- 规则说明 -->
     <section class="section-head">
-      <div><h2>策略规则</h2><p class="section-sub">「激进版」信号内核：EMA8/21 金叉入场 + 2.2ATR 止损 + 12% 移动止损 + 卖出后冷却约2.7天（基于五币历史回测寻优）</p></div>
+      <div><h2>策略规则</h2><p class="section-sub">「攻守兼备版」信号内核：EMA5/34 金叉入场 + 0.8ATR 止损 + 40% 宽移动止损 + 卖出无冷却 · 不加仓（基于 CORE 上涨段捕获率寻优、HYPE 涨市与 CORE 跌市交叉验证）</p></div>
     </section>
     <section class="card rules-card">
       <div class="rule-row">

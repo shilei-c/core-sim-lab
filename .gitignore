@@ -7,3 +7,15 @@ data/opt-*.json
 
 # node 依赖（站点运行无需 npm install）
 node_modules/
+
+# 本地研究/寻优脚本与中间数据（不影响站点运行，无需上传）
+_*.js
+_*.py
+data/core-bull-*.json
+data/core-uplegs.json
+data/gain-candles/
+data/gain-extra.json
+data/gain-scan.json
+data/hype-core-compare.json
+data/strategy-search-*.json
+微信成交提醒配置.md
