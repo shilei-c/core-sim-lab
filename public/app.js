@@ -94,22 +94,6 @@
     }
   }
 
-  function renderOverview() {
-    if (!report) return;
-    let best = null;
-    for (const w of report.windows) {
-      const rows = report.results[w.key] || [];
-      for (const r of rows) {
-        if (!best || r.returnPct > best.returnPct) best = Object.assign({}, r, { windowLabel: w.label });
-      }
-    }
-    if (!best) return;
-    $('bestReturn').textContent = (best.returnPct > 0 ? '+' : '') + best.returnPct.toFixed(2) + '%';
-    $('bestReturn').className = 'stat-value big ' + signCls(best.returnPct);
-    $('bestRuleTag').textContent = NAMES[best.rule] || best.rule;
-    $('bestPeriod').textContent = best.windowLabel + ' · ' + COINS.length + ' 币中最高';
-  }
-
   /** 取某币在指定窗口的自由模式（R1）回测结果 */
   function coinResult(coin, win) {
     const src = coin === 'CORE' ? report : (multiReport && multiReport.coins && multiReport.coins[coin]);
@@ -438,7 +422,7 @@
 
   function renderAll() {
     renderStatus(report ? report.source : { sourceName: '—', mode: 'loading' });
-    renderOverview(); renderTable(); renderScoreTable(); drawChart(); renderSignals(); renderTrades();
+    renderTable(); renderScoreTable(); drawChart(); renderSignals(); renderTrades();
   }
 
   async function loadBacktest() {

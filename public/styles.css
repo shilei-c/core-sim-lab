@@ -42,7 +42,7 @@ button{font-family:inherit}
 .up{color:var(--red)!important}   /* 中国习惯：涨红 */
 .down{color:var(--green)!important} /* 跌绿 */
 
-.overview{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:26px}
+.overview{display:grid;grid-template-columns:1fr;gap:14px;margin-bottom:26px}
 .stat-card{padding:18px 20px;min-height:112px;display:flex;flex-direction:column;justify-content:space-between}
 .stat-card.accent{background:linear-gradient(145deg,#1d1d1f,#3a3a3c);color:#fff;border:none}
 .stat-card.accent .stat-foot{color:rgba(255,255,255,.6)}
@@ -221,7 +221,7 @@ button{font-family:inherit}
   .signal-toolbar{padding:14px 16px 4px}
   .signal-confirmed,.signal-foot{margin-left:16px;margin-right:16px}
 }
-  .overview{grid-template-columns:1fr 1fr}
+  .overview{grid-template-columns:1fr}
   .section-head h2{font-size:18px}
   .ticker-card{display:flex;overflow-x:auto;-webkit-overflow-scrolling:touch}
   .ticker-item{flex:0 0 132px;padding:12px 10px}
