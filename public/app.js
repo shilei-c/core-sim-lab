@@ -25,7 +25,7 @@
     return Number(v).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   }
   function fmtPrice(v) {
-    if (!v) return '—';
+    if (!v) return '数据加载中';
     return v < 1 ? '$' + Number(v).toFixed(6) : '$' + Number(v).toFixed(4);
   }
   function fmtTime(ts) {
@@ -107,7 +107,7 @@
     $('tableTitle').textContent = (w ? w.label : '') + ' · ' + COINS.length + ' 币回测结果';
     const items = COINS.map(coin => ({ coin, r: coinResult(coin, currentWindow) })).filter(x => x.r);
     if (!items.length) {
-      $('dataNote').textContent = '—';
+      $('dataNote').textContent = '数据加载中';
       $('resultBody').innerHTML = '<tr><td colspan="8" style="text-align:center;padding:20px;color:var(--sub)">加载中…</td></tr>';
       return;
     }
@@ -115,7 +115,7 @@
     const daysList = items.map(x => x.r.dataDays).filter(Boolean);
     $('dataNote').textContent = daysList.length
       ? '实际数据 ' + Math.min.apply(null, daysList) + '–' + Math.max.apply(null, daysList) + ' 天' + (insufficient ? '（历史不足，仅供参考）' : '')
-      : '—';
+      : '数据加载中';
     // 按超额收益降序排列：超额收益 = 区间收益 − 币价涨跌（策略跑赢同期持有币价的幅度越大越靠前）
     const excess = r => Number(r.returnPct || 0) - Number(r.coinChangePct || 0);
     const sorted = items.slice().sort((a, b) => excess(b.r) - excess(a.r));
@@ -313,7 +313,7 @@
     } catch (e) {
       const body = $('marketBody');
       if (body) body.innerHTML = '<tr><td colspan="7" class="market-empty">榜单加载失败：' + e.message + '</td></tr>';
-      $('marketMeta').textContent = '—';
+      $('marketMeta').textContent = '数据加载中';
     }
   }
 
@@ -421,7 +421,7 @@
   }
 
   function renderAll() {
-    renderStatus(report ? report.source : { sourceName: '—', mode: 'loading' });
+    renderStatus(report ? report.source : { sourceName: '数据加载中', mode: 'loading' });
     renderTable(); renderScoreTable(); drawChart(); renderSignals(); renderTrades();
   }
 
@@ -586,7 +586,7 @@
     });
     const s = currentSignal();
     if (!s || s.error) {
-      box.textContent = '—'; box.className = 'signal-action act-wait';
+      box.textContent = '数据加载中'; box.className = 'signal-action act-wait';
       $('signalReason').textContent = s && s.error ? ('信号计算失败：' + s.error) : '信号数据加载中…';
       return;
     }
