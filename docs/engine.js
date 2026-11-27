@@ -18,29 +18,28 @@
   const SLIPPAGE = 0.0003;            // 单边滑点 0.03%
   const BAR_MS = 4 * 3600 * 1000;     // 4 小时
 
-  // 跨周期稳健版信号内核参数（2023 熊牛两币寻优 + 当前一年六币约束校验）
-  // 2023: CORE 暴跌 -94% / STX 暴涨 +613% 两个极端样本；当前一年六币作不崩约束
-  const FAST_PERIOD = 5;
-  const SLOW_PERIOD = 89;         // 慢线放宽到 89：2023 单边暴跌中不被反复抄底，暴涨中吃完整趋势
+  // 激进版信号内核参数（基于近1年/半年/3月五币回测寻优，兼顾收益与稳健性）
+  const FAST_PERIOD = 8;
+  const SLOW_PERIOD = 21;
   const RSI_PERIOD = 14;
   const ATR_PERIOD = 14;
-  const BREAKOUT_LOOKBACK = 10;   // 保留字段兼容；突破入场已关闭（追高为亏损主因）
-  const ATR_STOP = 4.0;           // ATR 止损放宽到 4：高波动币给足容错，避免暴涨初期被震出
+  const BREAKOUT_LOOKBACK = 10;   // 保留字段兼容；突破入场已关闭（熊市追高亏损主因）
+  const ATR_STOP = 2.2;           // ATR 止损放宽，避免震荡市频繁被扫
   const USE_BREAKOUT = false;     // 关闭动量突破入场，仅保留均线金叉
-  const TRAILING_STOP = 0.20;     // 移动止损 20%：涨时让利润奔跑，跌时及时锁定
-  const COOLDOWN_BARS = 48;       // 冷却 48 根 4H（约8天）：暴跌后避免反复抄底，暴涨后等回调再上车
-  const MAX_ADD = 0;              // 不加仓：单次满仓介入，不追高摊薄
+  const TRAILING_STOP = 0.12;     // 移动止损：从持仓期最高价回撤 12% 止盈/止损
+  const COOLDOWN_BARS = 16;       // 卖出/止损后冷却 16 根 4H K 线（约2.7天）再入场
+  const MAX_ADD = 2;              // 顺势加仓：浮盈后最多加仓 2 次
 
   const RULES = [
     { id: 'R1', name: '自由模式', minTrades: 0, desc: '仅按信号交易，每日无交易次数限制' }
   ];
   const STRATEGY = {
-    label: '跨周期稳健版',
+    label: '激进版',
     fast: FAST_PERIOD, slow: SLOW_PERIOD, rsi: RSI_PERIOD,
     breakoutLookback: BREAKOUT_LOOKBACK, atrStop: ATR_STOP,
     maxAdd: MAX_ADD, addFraction: 0.5, entryFraction: 0.98,
     trailingStop: TRAILING_STOP, cooldownBars: COOLDOWN_BARS, useBreakout: USE_BREAKOUT,
-    note: 'EMA5/89 金叉入场满仓，不加仓；4ATR 止损 + 20% 移动止损，卖出冷却约8天（2023 熊牛两币寻优：STX 暴涨年 +337%，同时当前一年六币均值 +54% 不崩）'
+    note: 'EMA8/21 金叉入场，满仓介入并顺势加仓；2.2ATR 止损 + 12% 移动止损锁定利润，卖出后冷却约2.7天再入场'
   };
 
   const WINDOWS = [
@@ -103,8 +102,8 @@
     return out;
   }
 
-  /* ---------------- 信号（跨周期稳健版） ----------------
-   * EMA5/89 金叉入场、死叉/超买/趋势转弱离场；突破入场已关闭。
+  /* ---------------- 信号（激进版） ----------------
+   * EMA8/21 金叉入场、死叉/超买/趋势转弱离场；突破入场已关闭。
    * 每次信号附带中文原因，供"买入时点参考"展示。
    */
   function computeSignals(candles) {
@@ -129,7 +128,7 @@
         for (let j = i - BREAKOUT_LOOKBACK; j < i; j++) hh = Math.max(hh, candles[j].h);
         breakout = closes[i] > hh;
       }
-      // 入场：仅 EMA5/89 均线金叉（RSI<82）；动量突破关闭
+      // 入场：仅 EMA8/21 均线金叉（RSI<82）；动量突破关闭
       if (golden && r < 82) {
         signals[i] = 1;
         reasons[i] = '均线金叉';
@@ -155,7 +154,7 @@
     };
   }
 
-  /* ---------------- 单策略回测（跨周期稳健版） ---------------- */
+  /* ---------------- 单策略回测（激进版） ---------------- */
   /** 等距降采样：保留首尾点，最多返回 max 个点，控制 JSON 体积 */
   function sampleCurve(arr, max) {
     if (arr.length <= max) return arr;
@@ -229,9 +228,9 @@
       return true;
     }
 
-    // 跨周期稳健版不加仓：持仓期间不再追加，避免小币追高摊薄成本
+    // 激进加仓阈值：持仓浮盈且再次出现买入信号时加仓（最多 2 次）
     let addOnCount = 0;
-    const MAX_ADD = 0;
+    const MAX_ADD = 2;
 
     for (let i = 0; i < candles.length; i++) {
       const c = candles[i];

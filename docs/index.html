@@ -102,7 +102,7 @@
     <section class="section-head signal-head">
       <div>
         <h2>实时交易信号 <span class="live-pulse" id="signalPulse"></span></h2>
-        <p class="section-sub">按同一套跨周期稳健版规则实时推演 · 区分「已收盘确认」与「当前K线预览」· 每 60 秒自动刷新</p>
+        <p class="section-sub">按同一套激进版规则实时推演 · 区分「已收盘确认」与「当前K线预览」· 每 60 秒自动刷新</p>
       </div>
     </section>
     <section class="card signal-panel">
@@ -143,7 +143,7 @@
         <div class="sig-cell"><span class="sig-k">移动止损</span><span id="sigTrailStop" class="sig-v">—</span></div>
         <div class="sig-cell"><span class="sig-k">距止损</span><span id="sigDistance" class="sig-v">—</span></div>
         <div class="sig-cell"><span class="sig-k">冷却剩余</span><span id="sigCooldown" class="sig-v">—</span></div>
-        <div class="sig-cell"><span class="sig-k">EMA5 / 89</span><span id="sigEma" class="sig-v">—</span></div>
+        <div class="sig-cell"><span class="sig-k">EMA8 / 21</span><span id="sigEma" class="sig-v">—</span></div>
         <div class="sig-cell"><span class="sig-k">RSI / 趋势</span><span id="sigRsi" class="sig-v">—</span></div>
       </div>
       <div class="signal-confirmed">
@@ -234,7 +234,7 @@
     <section class="section-head">
       <div>
         <h2>买入时点参考</h2>
-        <p class="section-sub">跨周期稳健版策略内核说明 · 逐笔成交见下方明细栏目</p>
+        <p class="section-sub">激进版策略内核说明 · 逐笔成交见下方明细栏目</p>
       </div>
     </section>
     <section class="card signals-card">
@@ -305,7 +305,7 @@
 
     <!-- 规则说明 -->
     <section class="section-head">
-      <div><h2>策略规则</h2><p class="section-sub">「跨周期稳健版」信号内核：EMA5/89 金叉入场 + 4ATR 止损 + 20% 移动止损 + 卖出冷却约8天 · 不加仓（基于 2023 年 CORE 暴跌 / STX 暴涨两极行情寻优，并用当前一年六币数据校验不崩）</p></div>
+      <div><h2>策略规则</h2><p class="section-sub">「激进版」信号内核：EMA8/21 金叉入场 + 顺势加仓 + 2.2ATR 止损 + 12% 移动止损 + 卖出冷却约2.7天（基于近一年/半年/3月五币回测寻优，兼顾收益与稳健性）</p></div>
     </section>
     <section class="card rules-card">
       <div class="rule-row">
