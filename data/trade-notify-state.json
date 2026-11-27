@@ -1,9 +1,9 @@
 {
-  "fingerprint": "1795449600000_sell",
-  "beijing": "2026-11-24 00:00",
+  "fingerprint": "1795377600000_sell",
+  "beijing": "2026-11-23 04:00",
   "side": "sell",
-  "price": 0.01001799,
-  "notifiedAt": 1795729826194,
+  "price": 0.01003799,
+  "notifiedAt": 1795741593140,
   "channel": "Server酱（个人微信）",
   "message": "已推送"
 }
